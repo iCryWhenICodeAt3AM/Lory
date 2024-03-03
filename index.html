@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container-fluid">
+  <div class="row">
+    <div class="col-md-6 p-0">
+      <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-caption">
+            <h1>LORY'S SEAFOOD EATERY</h1>
+          </div>
+          <div class="carousel-item active">
+            <img src="img/Photo1.jpg" class="d-block w-100" alt="Image 1">
+          </div>
+          <div class="carousel-item">
+            <img src="img/Photo2.jpg" class="d-block w-100" alt="Image 2">
+          </div>
+          <!-- Add more carousel items as needed -->
+        </div>
+        <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+      </div>
+    </div>
+    <div class="col-md-6 login-section">
+      <div class="d-flex justify-content-center align-items-center h-100">
+        <div>
+          <ul class="nav nav-tabs justify-content-center mb-2" id="loginTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="signin-tab" data-toggle="tab" href="#signin" role="tab" aria-controls="signin" aria-selected="true">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="signup-tab" data-toggle="tab" href="#signup" role="tab" aria-controls="signup" aria-selected="false">Sign Up</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="loginTabsContent">
+            <div class="tab-pane fade show active" id="signin" role="tabpanel" aria-labelledby="signin-tab">
+              <h2 class="text-center mb-4">Login</h2>
+              <button id="google-login" class="btn btn-danger btn-lg btn-block mb-3">Login with Google</button>
+              <p class="text-center">or</p>
+              <form id="login-form"> <!-- Assign an ID to the login form -->
+                <div class="form-group">
+                  <input type="email" class="form-control" id="email-login" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                  <input type="password" class="form-control" id="password-login" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="signup" role="tabpanel" aria-labelledby="signup-tab">
+              <h2 class="text-center mb-4">Sign Up</h2>
+              <button id="google-login-signup" class="btn btn-danger btn-lg btn-block mb-3">Sign up with Google</button>
+              <p class="text-center">or</p>
+              <form>
+                <div class="form-group">
+                  <input type="email" class="form-control" id="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                  <input type="password" class="form-control" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Sign up</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <script type="module">
+  // Import the necessary Firebase authentication function
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+// Your Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
+  authDomain: "lory-c64ec.firebaseapp.com",
+  projectId: "lory-c64ec",
+  storageBucket: "lory-c64ec.appspot.com",
+  messagingSenderId: "371071401749",
+  appId: "1:371071401749:web:f5f5ef959488fcfd78b31c",
+  measurementId: "G-TXBTQ3L6XE"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth();
+
+// Add event listener to the login form
+const loginForm = document.querySelector('#login-form');
+
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault(); // Prevent the default form submission behavior
+  const email = document.querySelector('#email-login').value;
+  const password = document.querySelector('#password-login').value;
+
+  // Call Firebase authentication method to sign in with email and password
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Handle successful login
+      console.log('User logged in successfully:', userCredential.user);
+    })
+    .catch((error) => {
+      // Handle errors
+      console.error('Login Error:', error.message);
+    });
+});
+
+ // Google login button click event
+    const googleLoginBtns = document.querySelectorAll('#google-login, #google-login-signup');
+    googleLoginBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+          .then((result) => {
+            // Handle successful login
+            console.log('Google Sign-In Successful!', result);
+          })
+          .catch((error) => {
+            // Handle errors
+            console.error('Google Sign-In Error:', error);
+          });
+      });
+    });
+
+</script>
+
+</body>
+</html>
