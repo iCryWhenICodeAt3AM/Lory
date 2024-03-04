@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Page</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar for Hi Admin! and Logout dropdown -->
+  <nav class="navbar navbar-light bg-light">
+    <span class="navbar-text mr-auto">
+      Hi Admin!
+    </span>
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Logout
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" id="logout-btn" href="#">Logout</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Side Navbar -->
+      <div class="col-md-3">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <a class="nav-link active" id="dashboard-tab" data-toggle="pill" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="true">Dashboard</a>
+          <a class="nav-link" id="data-entry-tab" data-toggle="pill" href="#data-entry" role="tab" aria-controls="data-entry" aria-selected="false">Data Entry</a>
+        </div>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="col-md-9">
+        <div class="tab-content" id="v-pills-tabContent">
+          <!-- Dashboard Section -->
+          <div class="tab-pane fade show active" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
+            <h2 class="text-center mt-5">Dashboard</h2>
+            <!-- Add your dashboard content here (e.g., total orders, total purchases, statistics, graphs, etc.) -->
+          </div>
+
+          <!-- Data Entry Section -->
+          <div class="tab-pane fade" id="data-entry" role="tabpanel" aria-labelledby="data-entry-tab">
+            <h2 class="text-center mt-5">Data Entry</h2>
+            <div id="employee-form" class="mt-4">
+              <!-- Button to open modal for adding new employee -->
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addEmployeeModal">
+                Add New Employee
+              </button>
+            </div>
+            <div id="employee-table" class="mt-4">
+              <!-- Table for displaying existing employees -->
+              <h4 class="text-center">Existing Employees</h4>
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col">Employee ID</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">Role</th>
+                      <th scope="col">Contact Number</th>
+                      <th scope="col">Address</th>
+                    </tr>
+                  </thead>
+                  <tbody id="employee-table-body">
+                    <!-- Table rows will be dynamically populated with employee data -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for adding new employee -->
+  <!-- Modal for adding new employee -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addEmployeeModalLabel">Add New Employee</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form for adding a new employee -->
+        <div class="form-group">
+          <label for="employee-name">Name</label>
+          <input type="text" class="form-control" id="employee-name" required>
+        </div>
+        <div class="form-group">
+          <label for="employee-middle-name">Middle Name</label>
+          <input type="text" class="form-control" id="employee-middle-name">
+        </div>
+        <div class="form-group">
+          <label for="employee-last-name">Last Name</label>
+          <input type="text" class="form-control" id="employee-last-name" required>
+        </div>
+        <div class="form-group">
+          <label for="employee-role">Role</label>
+          <select class="form-control" id="employee-role" required>
+            <option value="Customer">Customer (Ordering/Menu)</option>
+            <option value="Cashier">Cashier</option>
+            <option value="Cook">Cook</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="employee-contact">Contact Number</label>
+          <input type="number" class="form-control" id="employee-contact" required>
+        </div>
+        <div class="form-group">
+          <label for="employee-address">Address</label>
+          <input type="text" class="form-control" id="employee-address" required>
+        </div>
+        <div class="form-group">
+          <label for="employee-email">Email</label>
+          <input type="email" class="form-control" id="employee-email" required>
+        </div>
+        <div class="form-group">
+          <label for="employee-password">Password</label>
+          <input type="password" class="form-control" id="employee-password" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save-employee-btn-modal">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Bootstrap and Firebase Scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <script type="module">
+    // Import Firebase authentication functions
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // Firebase configuration
+const firebaseConfig = {
+        apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
+        authDomain: "lory-c64ec.firebaseapp.com",
+        projectId: "lory-c64ec",
+        storageBucket: "lory-c64ec.appspot.com",
+        messagingSenderId: "371071401749",
+        appId: "1:371071401749:web:f5f5ef959488fcfd78b31c",
+        measurementId: "G-TXBTQ3L6XE"
+      };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const firestore = getFirestore(app);
+
+    // Generate 10-digit employee ID
+    const generateEmployeeID = () => {
+        const randomID = Math.floor(Math.random() * 9000000000) + 1000000000;
+        return randomID.toString();
+    };
+
+    // Fetch and display existing employees
+    const displayEmployees = async () => {
+        const employeesRef = collection(firestore, 'employees');
+        const querySnapshot = await getDocs(employeesRef);
+        const employeeTableBody = document.getElementById('employee-table-body');
+        employeeTableBody.innerHTML = ''; // Clear existing table rows
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${doc.id}</td>
+                <td>${data.name} ${data.middleName ? data.middleName : ''} ${data.lastName}</td>
+                <td>${data.role}</td>
+                <td>${data.contact}</td>
+                <td>${data.address}</td>
+            `;
+            employeeTableBody.appendChild(newRow);
+        });
+    };
+
+    // Call displayEmployees function when the page loads
+    displayEmployees();
+
+    // Add event listener for the "Save" button in modal
+    const saveEmployeeBtnModal = document.getElementById('save-employee-btn-modal');
+    saveEmployeeBtnModal.addEventListener('click', async () => {
+        // Get the employee details from the modal form
+        const name = document.getElementById('employee-name').value;
+        const middleName = document.getElementById('employee-middle-name').value;
+        const lastName = document.getElementById('employee-last-name').value;
+        const role = document.getElementById('employee-role').value;
+        const contact = document.getElementById('employee-contact').value;
+        const address = document.getElementById('employee-address').value;
+        const email = document.getElementById('employee-email').value;
+        const password = document.getElementById('employee-password').value;
+
+        // Generate employee ID
+        const employeeID = generateEmployeeID();
+
+        // Save the employee details to Firestore
+        const employeesRef = collection(firestore, 'employees');
+        await addDoc(employeesRef, {
+            id: employeeID,
+            name: name,
+            middleName: middleName,
+            lastName: lastName,
+            role: role,
+            contact: contact,
+            address: address,
+            email: email,
+            password: password
+        });
+
+        // Close the modal
+        $('#addEmployeeModal').modal('hide');
+
+        // Update the table with the new employee
+        displayEmployees();
+    });
+
+    // Add event listener to the logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn.addEventListener('click', () => {
+        signOut(auth)
+            .then(() => {
+                // Redirect the user to the login page after logout
+                window.location.href = 'index.html';
+            })
+            .catch((error) => {
+                console.error('Logout Error:', error.message);
+            });
+    });
+
+    // Check authentication state when the page loads
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            // User is not logged in, redirect to the login page
+            window.location.href = 'index.html';
+        } else {
+            // User is logged in, check their role
+            const userDoc = await getDoc(doc(firestore, 'employees', user.uid));
+            const userData = userDoc.data();
+            const role = userData.role.toLowerCase();
+
+            // Redirect based on role
+            switch (role) {
+                case 'admin':
+                    window.location.href = 'admin.html';
+                    break;
+                case 'cashier':
+                    window.location.href = 'cashier.html';
+                    break;
+                case 'cook':
+                    window.location.href = 'cook.html';
+                    break;
+                case 'customer':
+                    window.location.href = 'customer.html';
+                    break;
+                default:
+                    // Redirect to default page if role is not recognized
+                    window.location.href = 'index.html';
+            }
+        }
+    });
+
+</script>
+
+</body>
+</html>

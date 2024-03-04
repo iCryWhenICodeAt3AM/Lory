@@ -16,11 +16,11 @@
     .carousel-caption h1 {
       font-size: 50px;
       font-weight: bold;
-      text-align: center;
+
       color: #ff3131;
       -webkit-text-stroke-width: 1px;
       -webkit-text-stroke-color: #ffd34e; /* Can be changed in the live sample */
-
+      position: absolute;
        }
     .login-section {
       height: 100vh;
