@@ -49,8 +49,6 @@
               <div class="tab-content" id="loginTabsContent">
                 <div class="tab-pane fade show active" id="signin" role="tabpanel" aria-labelledby="signin-tab">
                   <h2 class="text-center mb-4">Login</h2>
-                  <button id="google-login" class="btn btn-danger btn-lg btn-block mb-3">Login with Google</button>
-                  <p class="text-center">or</p>
                   <form id="login-form"> <!-- Assign an ID to the login form -->
                     <div class="form-group">
                       <input type="email" class="form-control" id="email-login" placeholder="Email" required>
@@ -78,9 +76,8 @@
     // Import the necessary Firebase authentication function
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // Your Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
         authDomain: "lory-c64ec.firebaseapp.com",
@@ -94,6 +91,7 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
+    const firestore = getFirestore(app);
 
     // Add event listener to the login form
     const loginForm = document.querySelector('#login-form');
@@ -103,31 +101,20 @@
       const password = document.querySelector('#password-login').value;
 
       try {
-        // Try signing in with email and password
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (error) {
-        // If signing in with email/password fails, try Google sign-in
-        const provider = new GoogleAuthProvider();
-        try {
-          await signInWithPopup(auth, provider);
-        } catch (error) {
-          // Handle both email/password and Google sign-in errors
-          const errorMessage = error.message;
-          document.getElementById('login-error').textContent = errorMessage;
+        // Query Firestore to find the user with the provided email
+        const querySnapshot = await getDocs(query(collection(firestore, 'employees'), where('email', '==', email)));
+        if (!querySnapshot.empty) {
+          // If a user with the provided email is found, authenticate with the provided password
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          // If no user with the provided email is found, display an error message
+          document.getElementById('login-error').textContent = "Invalid email or password";
         }
+      } catch (error) {
+        // Handle email/password sign-in errors
+        const errorMessage = error.message;
+        document.getElementById('login-error').textContent = errorMessage;
       }
-    });
-
-    // Google login button click event
-    const googleLoginBtn = document.getElementById('google-login');
-    googleLoginBtn.addEventListener('click', () => {
-      const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider)
-        .catch((error) => {
-          // Handle Google sign-in errors
-          const errorMessage = error.message;
-          document.getElementById('login-error').textContent = errorMessage;
-        });
     });
 
     // Check if the user is authenticated
