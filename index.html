@@ -74,56 +74,82 @@
   
   <script type="module">
     // Import the necessary Firebase authentication function
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
-        authDomain: "lory-c64ec.firebaseapp.com",
-        projectId: "lory-c64ec",
-        storageBucket: "lory-c64ec.appspot.com",
-        messagingSenderId: "371071401749",
-        appId: "1:371071401749:web:f5f5ef959488fcfd78b31c",
-        measurementId: "G-TXBTQ3L6XE"
-    };
-
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+const firebaseConfig = {
+    apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
+    authDomain: "lory-c64ec.firebaseapp.com",
+    projectId: "lory-c64ec",
+    storageBucket: "lory-c64ec.appspot.com",
+    messagingSenderId: "371071401749",
+    appId: "1:371071401749:web:f5f5ef959488fcfd78b31c",
+    measurementId: "G-TXBTQ3L6XE"
+  };
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
     const firestore = getFirestore(app);
+ // Function to get role based on email
+  const getRoleByEmail = async (email) => {
+    const q = query(collection(firestore, 'employees'), where("email", "==", email));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      return querySnapshot.docs[0].data().role;
+    }
+    return null; // Return null if no matching user found
+  };
 
-    // Add event listener to the login form
-    const loginForm = document.querySelector('#login-form');
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault(); // Prevent the default form submission behavior
-      const email = document.querySelector('#email-login').value;
-      const password = document.querySelector('#password-login').value;
+  // Add event listener to the login form
+  const loginForm = document.querySelector('#login-form');
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); // Prevent the default form submission behavior
+    const email = document.querySelector('#email-login').value;
+    const password = document.querySelector('#password-login').value;
 
-      try {
-        // Query Firestore to find the user with the provided email
-        const querySnapshot = await getDocs(query(collection(firestore, 'employees'), where('email', '==', email)));
-        if (!querySnapshot.empty) {
-          // If a user with the provided email is found, authenticate with the provided password
-          await signInWithEmailAndPassword(auth, email, password);
-        } else {
-          // If no user with the provided email is found, display an error message
-          document.getElementById('login-error').textContent = "Invalid email or password";
+    try {
+      // Authenticate the user with Firebase Authentication
+      await signInWithEmailAndPassword(auth, email, password);
+      
+      // Get user's role
+      const role = await getRoleByEmail(email);
+      if (role) {
+        // Redirect based on role
+        switch (role) {
+          case "admin":
+            window.location.href = 'admin.html';
+            break;
+          case "customer":
+            window.location.href = 'customer.html';
+            break;
+          case "cook":
+            window.location.href = 'cook.html';
+            break;
+          case "cashier":
+            window.location.href = 'cashier.html';
+            break;
+          default:
+            // Redirect to an error page or handle the case when role is not recognized
+            break;
         }
-      } catch (error) {
-        // Handle email/password sign-in errors
-        const errorMessage = error.message;
-        document.getElementById('login-error').textContent = errorMessage;
+      } else {
+        // Handle case when role is not found for the user
+        console.error('Role not found for user:', email);
       }
-    });
+    } catch (error) {
+      // Handle authentication errors
+      const errorMessage = error.message;
+      document.getElementById('login-error').textContent = errorMessage;
+    }
+  });
 
-    // Check if the user is authenticated
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // If the user is logged in, redirect to the new page
-        window.location.href = `admin.html?email=${user.email}&uid=${user.uid}`;
-      }
-    });
+  // Check if the user is authenticated
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // If the user is logged in, redirect to the new page
+      window.location.href = `admin.html?email=${user.email}&uid=${user.uid}`;
+    }
+  });
   </script>
 </body>
 </html>

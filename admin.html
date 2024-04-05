@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
 
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
   <!-- Navbar for Hi Admin! and Logout dropdown -->
@@ -33,6 +33,7 @@
       <div class="col-md-3">
         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
           <a class="nav-link active" id="dashboard-tab" data-toggle="pill" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="true">Dashboard</a>
+          <a class="nav-link" id="data-entry-tab" data-toggle="pill" href="#data-entry" role="tab" aria-controls="data-entry" aria-selected="false">Data Entry</a>
           <a class="nav-link" id="data-entry-tab" data-toggle="pill" href="#data-entry" role="tab" aria-controls="data-entry" aria-selected="false">Data Entry</a>
         </div>
       </div>
@@ -64,6 +65,7 @@
                     <tr>
                       <th scope="col">Full Name</th>
                       <th scope="col">Role</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="employee-table-body">
@@ -241,23 +243,22 @@
 
 <script type="module">
     // Import Firebase authentication functions
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-    import { getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-    import { updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
-        authDomain: "lory-c64ec.firebaseapp.com",
-        projectId: "lory-c64ec",
-        storageBucket: "lory-c64ec.appspot.com",
-        messagingSenderId: "371071401749",
-        appId: "1:371071401749:web:f5f5ef959488fcfd78b31c",
-        measurementId: "G-TXBTQ3L6XE"
-    };
-
+const firebaseConfig = {
+    apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
+    authDomain: "lory-c64ec.firebaseapp.com",
+    projectId: "lory-c64ec",
+    storageBucket: "lory-c64ec.appspot.com",
+    messagingSenderId: "371071401749",
+    appId: "1:371071401749:web:f5f5ef959488fcfd78b31c",
+    measurementId: "G-TXBTQ3L6XE"
+  };
 // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
@@ -392,6 +393,9 @@ const addEmployee = async (name, middleName, lastName, role, contact, address, e
             password: password // Include password field
         });
 
+        // Create a new user account with email and password using Firebase Authentication
+        await createUserWithEmailAndPassword(auth, email, password);
+
         console.log('Employee added successfully');
         // Refresh the table to reflect the changes
         displayEmployees();
@@ -399,6 +403,7 @@ const addEmployee = async (name, middleName, lastName, role, contact, address, e
         console.error('Error adding employee:', error);
     }
 };
+
 
 
 const updateEmployee = async (employeeId, name, middleName, lastName, role, contact, address, email, password) => {
