@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Page</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -9,7 +9,7 @@
   <meta http-equiv="Expires" content="0">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
-
+  <link rel="shortcut icon" href="images/longciomay.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -20,13 +20,16 @@
     </span>
     <div class="dropdown">
       <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Logout
+        Settings
       </button>
       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
         <a class="dropdown-item" id="logout-btn" href="#">Logout</a>
       </div>
     </div>
   </nav>
+
+
+
   <div class="container-fluid">
     <div class="row">
       <!-- Side Navbar -->
@@ -34,7 +37,10 @@
         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
           <a class="nav-link active" id="dashboard-tab" data-toggle="pill" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="true">Dashboard</a>
           <a class="nav-link" id="data-entry-tab" data-toggle="pill" href="#data-entry" role="tab" aria-controls="data-entry" aria-selected="false">Data Entry</a>
-          <a class="nav-link" id="data-entry-tab" data-toggle="pill" href="#data-entry" role="tab" aria-controls="data-entry" aria-selected="false">Data Entry</a>
+          <a class="nav-link" id="transactions-tab" data-toggle="pill" href="#transactions" role="tab" aria-controls="transactions" aria-selected="false">Transactions</a>
+          <a class="nav-link" id="notifications-tab" data-toggle="pill" href="#notifications" role="tab" aria-controls="notifications" aria-selected="false">Notifications</a>
+          <a class="nav-link" id="reports-tab" data-toggle="pill" href="#reports" role="tab" aria-controls="reports" aria-selected="false">Reports</a>
+          <a class="nav-link" id="settings-tab" data-toggle="pill" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
         </div>
       </div>
       
@@ -50,51 +56,81 @@
           <!-- Data Entry Section -->
           <div class="tab-pane fade" id="data-entry" role="tabpanel" aria-labelledby="data-entry-tab">
             <h2 class="text-center mt-5">Data Entry</h2>
-            <div id="employee-form" class="mt-4">
-              <!-- Button to open modal for adding new employee -->
-              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addEmployeeModal">
-                Add New Employee
-              </button>
-            </div>
-                        <!-- Table for displaying existing employees -->
-            <div id="employee-table" class="mt-4">
-              <h4 class="text-center">Existing Employees</h4>
-              <div class="table-responsive">
-                <table class="table table-striped">
-                  <thead>
-                    <tr>
-                      <th scope="col">Full Name</th>
-                      <th scope="col">Role</th>
-                      <th scope="col">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="employee-table-body">
-                    <!-- Table rows will be dynamically populated with employee data -->
-                  </tbody>
-                </table>
+              <div id="employee-form" class="mt-4">
+                <!-- Button to open modal for adding new employee -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addEmployeeModal">
+                  Add New Employee
+                </button>
               </div>
-            </div>
-<!-- Modal for employee deletion confirmation -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to delete this employee?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-        <button type="button" class="btn btn-danger" id="confirm-delete-btn">Yes, delete</button>
-      </div>
-    </div>
-  </div>
-</div>
+                        <!-- Table for displaying existing employees -->
+                <div id="employee-table" class="mt-4">
+                  <h4 class="text-center">Existing Employees</h4>
+                  <div class="table-responsive">
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                          <th scope="col">Full Name</th>
+                          <th scope="col">Role</th>
+                          <th scope="col">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="employee-table-body">
+                        <!-- Table rows will be dynamically populated with employee data -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- Modal for employee deletion confirmation -->
+                  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          Are you sure you want to delete this employee?
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                          <button type="button" class="btn btn-danger" id="confirm-delete-btn">Yes, delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
           </div>
+        <!-- TRANSACTIONS -->
+                  <div class="tab-pane fade" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">
+                    <h2 class="text-center mt-5">Transactions</h2>
+                    <!-- Add your dashboard content here (e.g., total orders, total purchases, statistics, graphs, etc.) -->
+                  </div>
+        <!-- TRANSACTIONS -->
+
+        <!-- NOTIFICATIONS -->
+                  <div class="tab-pane fade" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+                    <h2 class="text-center mt-5">NOTIFICATIONS</h2>
+                    <!-- Add your dashboard content here (e.g., total orders, total purchases, statistics, graphs, etc.) -->
+                  </div>
+        <!-- NOTIFICATIONS -->
+
+        <!-- REPORTS -->
+                  <div class="tab-pane fade" id="reports" role="tabpanel" aria-labelledby="reports-tab">
+                    <h2 class="text-center mt-5">REPORTS</h2>
+                    <!-- Add your dashboard content here (e.g., total orders, total purchases, statistics, graphs, etc.) -->
+                  </div>
+        <!-- REPORTS -->
+
+        <!-- SETTINGS -->
+                  <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                    <h2 class="text-center mt-5">SETTINGS</h2>
+                    <!-- Add your dashboard content here (e.g., total orders, total purchases, statistics, graphs, etc.) -->
+                  </div>
+        <!-- SETTINGS -->
+
+
+
         </div>
       </div>
     </div>
@@ -494,7 +530,7 @@ document.getElementById('save-add-employee-btn-modal').addEventListener('click',
         document.getElementById('employee-name').value = '';
         document.getElementById('employee-middle-name').value = '';
         document.getElementById('employee-last-name').value = '';
-        document.getElementById('employee-role').value = 'Customer';
+        document.getElementById('employee-role').value = '';
         document.getElementById('employee-contact').value = '';
         document.getElementById('employee-address').value = '';
         document.getElementById('employee-email').value = '';

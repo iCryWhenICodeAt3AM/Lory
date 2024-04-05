@@ -6,6 +6,7 @@
   <title>Login Page</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="shortcut icon" href="images/longciomay.ico" type="image/x-icon">
   <style>
    /* Custom styles for mobile devices */
     @media (max-width: 576px) {
@@ -90,6 +91,7 @@ const firebaseConfig = {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
     const firestore = getFirestore(app);
+
  // Function to get role based on email
   const getRoleByEmail = async (email) => {
     const q = query(collection(firestore, 'employees'), where("email", "==", email));
@@ -116,16 +118,16 @@ const firebaseConfig = {
       if (role) {
         // Redirect based on role
         switch (role) {
-          case "admin":
+          case "Admin":
             window.location.href = 'admin.html';
             break;
-          case "customer":
+          case "Customer":
             window.location.href = 'customer.html';
             break;
-          case "cook":
+          case "Cook":
             window.location.href = 'cook.html';
             break;
-          case "cashier":
+          case "Cashier":
             window.location.href = 'cashier.html';
             break;
           default:
@@ -143,11 +145,34 @@ const firebaseConfig = {
     }
   });
 
-  // Check if the user is authenticated
-  onAuthStateChanged(auth, (user) => {
+ // Check if the user is authenticated
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // If the user is logged in, redirect to the new page
-      window.location.href = `admin.html?email=${user.email}&uid=${user.uid}`;
+      // Get user's role
+      const role = await getRoleByEmail(user.email);
+      if (role) {
+        // Redirect based on role
+        switch (role) {
+          case "Admin":
+            window.location.href = 'admin.html';
+            break;
+          case "Customer":
+            window.location.href = 'customer.html';
+            break;
+          case "Cook":
+            window.location.href = 'cook.html';
+            break;
+          case "Cashier":
+            window.location.href = 'cashier.html';
+            break;
+          default:
+            // Redirect to an error page or handle the case when role is not recognized
+            break;
+        }
+      } else {
+        // Handle case when role is not found for the user
+        console.error('Role not found for user:', user.email);
+      }
     }
   });
   </script>
