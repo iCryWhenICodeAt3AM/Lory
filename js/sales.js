@@ -142,14 +142,21 @@ function populateValueDropdown(period) {
     }
 }
 
-function changeText(id, value){
-    if(id=="periodDropdown"){
-        document.getElementById("valueDropdown").textContent = "Select";
+function changeText(id, value) {
+    // Update the text content of the dropdown with the provided ID
+    const dropdown = document.getElementById(id);
+    if (dropdown) {
+        dropdown.textContent = value;
     }
-    document.getElementById(id).textContent = value;
+
+    // If the provided ID is for the periodDropdown, reset the valueDropdown
+    if (id === "periodDropdown") {
+        const valueDropdown = document.getElementById("valueDropdown");
+        if (valueDropdown) {
+            valueDropdown.textContent = "Select";
+        }
+    }
 }
 
-// Example usage:
-// getSales('week'); // Get sales for the current day
-// getSales('week'); // Get sales for the current week
+// Default Sales Query
 getSales('day', '');

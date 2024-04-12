@@ -112,7 +112,7 @@ function verification(){
     document.querySelector(".verification").classList.add("disabled");
     document.querySelector(".verification").classList.add("btn-success");
     document.getElementById('list').innerHTML = "";
-    db.collection("orders").doc("BawoijACJlbVRi8sHQqI").collection("queue").get().then((itemSnapshot) => {
+    db.collection("orders").doc("BawoijACJlbVRi8sHQqI").collection("queue").orderBy("date", "desc").get().then((itemSnapshot) => {
         itemSnapshot.forEach((itemDoc) => {
             const itemData = itemDoc.data();
             const tableid = itemData.tableid;
@@ -148,7 +148,7 @@ function pending(){
     document.querySelector(".pending").classList.add("disabled");
     document.querySelector(".pending").classList.add("btn-success");
     document.getElementById('list').innerHTML = "";
-    db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").get().then((itemSnapshot) => {
+    db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").orderBy("date", "desc").get().then((itemSnapshot) => {
         itemSnapshot.forEach((itemDoc) => {
             const itemData = itemDoc.data();
             const tableid = itemData.tableid;
@@ -184,6 +184,28 @@ function completed(){
     document.querySelector(".completed").classList.add("btn-success");
     document.querySelector(".completed").classList.add("disabled");
     document.getElementById('list').innerHTML = "";
+    db.collection("orders").doc("QiQgHzK5ejJONcqySnGg").collection("queue").orderBy("date", "desc").get().then((itemSnapshot) => {
+        itemSnapshot.forEach((itemDoc) => {
+            const itemData = itemDoc.data();
+            const tableid = itemData.tableid;
+            const customerid = itemData.customerid;
+            const status = itemData.status;
+            const total = itemData.total;
+            const date = itemData.date;
+            
+            // Construct HTML for each row
+
+            document.getElementById('list').innerHTML += `
+                <tr id="pending-list" class="${itemDoc.id}">
+                    <td>${tableid}</td>
+                    <td>${customerid}</td>
+                    <td>${total}</td>
+                    <td>${status}</td>
+                    <td><button class="btn btn-sm btn-success list-button" id="${itemDoc.id}" onclick="getDetails('${itemDoc.id}', 'dashboard')">Confirm</button></td>
+                </tr>
+            `;
+        });
+    });
 }
 
 function getDetails(docId, operation){
@@ -303,8 +325,37 @@ function getDetails(docId, operation){
     }
 }
 
-function verify(docId) {
-    verifytransferDocument(docId);
+function toggleStatus(docId) {
+    const docRef = db.collection("orders").doc("QiQgHzK5ejJONcqySnGg").collection("queue").doc(docId);
+
+    // Get the current status of the document
+    docRef.get().then((docSnapshot) => {
+        if (docSnapshot.exists) {
+            const currentStatus = docSnapshot.data().status;
+            const newStatus = currentStatus === "completed" ? "paid" : "completed";
+
+            // Update the status field with the new status
+            docRef.update({ status: newStatus }).then(() => {
+                console.log("Status updated successfully.");
+                document.querySelector(`.${docId}`).cells[3].textContent = newStatus;
+            }).catch((error) => {
+                console.error("Error updating status:", error);
+            });
+        } else {
+            console.error("Document does not exist.");
+        }
+    }).catch((error) => {
+        console.error("Error getting document:", error);
+    });
+}
+
+
+function verify(docId, method) {
+    if(method == "verification"){
+        verifytransferDocument(docId);
+    } else {
+        toggleStatus(docId);
+    }
 }
 
 function verifytransferDocument(docId) {
