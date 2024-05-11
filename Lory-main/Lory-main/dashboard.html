@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lory's Seafood</title>
+
+    <link rel="stylesheet" href="css/master.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <!-- Other meta tags and CSS/JS links -->
+    <link rel="icon" href="images/longciomay.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="images/longciomay.ico" type="image/x-icon">
+
+ 
+
+      <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <link href="assets/css/nucleo-icons.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link id="pagestyle" href="assets/css/soft-ui-dashboard.css?v=1.0.7" rel="stylesheet" />
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="profile-info col-2 text-center">
+                <div class="row">
+                    <div class="col-12 pt-3">
+                        <div class="row">
+                            <div class="col-12 text-nowrap">
+                                <h6>VIEWING DECK 4:</h6>
+                            </div>
+                            <div class="col-12">
+                                <h6>LORY’S SEAFOOD EATERY</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="logout-container col-10 text-end">
+                <div class="row">
+                  <nav class="navbar navbar-green ">
+                    <div class="dropdown">
+                      <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Settings
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" id="logout-btn" href="#">Logout</a>
+                      </div>
+                    </div>
+                  </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Side Nav - START -->
+            <nav class="side-navigation col-2 d-flex flex-column">
+                <ul class="list-unstyled flex-grow-1">
+<li class="p-3 d-flex m-3 dashboard">
+  
+        <img src="img/dashboard.png" alt="Food Icon" width="25%" height="25%">
+          <a href="dashboard.html"> <!-- Updated anchor tag -->
+        <div class="text-center flex-grow-1 pt-2 pl-3">
+            <h6 class="nav-item" id="dashboard-nav" style="color: black">Dashboard</h6>
+        </div>
+    </a>
+</li>
+
+                    <li class="p-3 d-flex m-3 data-entry">
+                        <img src="img/data-entry.png" alt="Food Icon" width="25%" height="25%">
+<div class="text-center flex-grow-1 pt-2 pl-3">
+    <h6 class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Data Entry</h6>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item active" href="#" id="employee-dropdown">Employee</a>
+        <a class="dropdown-item" href="#" id="product-dropdown">Data 2</a>
+    </div>
+</div>
+
+                    </li>
+
+                    <li class="p-3 d-flex m-3 transactions">
+                        <img src="img/transaction.png" alt="Food Icon" width="25%" height="25%">
+                        <div class="text-center flex-grow-1 pt-2 pl-3">
+                            <h6 class="nav-item" id="transactions-nav">Transactions</h6>
+                        </div>
+                    </li>
+                    <li class="p-3 d-flex m-3 notifications">
+                        <img src="img/notif.png" alt="Food Icon" width="25%" height="25%">
+                        <div class="text-center flex-grow-1 pt-2 pl-3">
+                             <h6 class="nav-item" id="notifications-nav">Notifications</h6>
+                        </div>
+                    </li>
+                    <li class="p-3 d-flex m-3 reports">
+                        <img src="img/report.png" alt="Food Icon" width="25%" height="25%">
+                        <div class="text-center flex-grow-1 pt-2 pl-3">
+                            <h6 class="nav-item" id="reports-nav">Reports</h6>
+                        </div>
+                    </li>
+                    <li class="p-3 d-flex m-3 settings">
+                        <img src="img/settings.png" alt="Food Icon" width="25%" height="25%">
+                        <div class="text-center flex-grow-1 pt-2 pl-3">
+                            <h6 class="nav-item" id="settings-nav">Settings</h6>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <!-- Side Nav - END -->
+            <!-- Dashboard - START -->
+            <div class="col-10 dashboard-content" style="height:570px; width:1110px;overflow:auto;">
+
+
+  <div class="container-fluid py-4">
+      <div class="row mt-4">
+        <div class="col-lg-5 mb-lg-0 mb-4">
+          <div class="card z-index-2">
+            <div class="card-body p-3">
+              <div class="bg-gradient-dark border-radius-lg py-3 pe-1 mb-3">
+                <div class="chart">
+                  <canvas id="chart-bars" class="chart-canvas" height="170"></canvas>
+                </div>
+              </div>
+            
+             
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="card z-index-2">
+            <div class="card-header pb-0">
+              <h6>Sales overview</h6>
+              <p class="text-sm">
+                <i class="fa fa-arrow-up text-success"></i>
+                <span class="font-weight-bold">4% more</span> in 2024
+              </p>
+            </div>
+            <div class="card-body p-3">
+              <div class="chart">
+                <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+
+
+            <!-- Dashboard - END -->
+
+            <!-- Sales - START -->
+            <div class="data-container col-7 d-none">
+                  <!-- Data Entry Section -->
+                  <div class="tab-pane" id="data-entry" role="tabpanel" aria-labelledby="data-entry-tab">
+                      <div id="employee-form" class="mt-4">
+                        <!-- Button to open modal for adding new employee -->
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addEmployeeModal">
+                          Add New Employee
+                        </button>
+                      </div>
+                                <!-- Table for displaying existing employees -->
+                        <div id="employee-table" class="mt-4" style="height:490px; width:1120px;overflow:auto;">
+                          <h6 class="text-center">Existing Employees</h6>
+                          <div class="table-responsive">
+                            <table class="table table-striped">
+                              <thead>
+                                <tr>
+                                  <th scope="col">Full Name</th>
+                                  <th scope="col">Role</th>
+                                  <th scope="col">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody id="employee-table-body">
+                                <!-- Table rows will be dynamically populated with employee data -->
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <!-- Modal for employee deletion confirmation -->
+                          <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  Are you sure you want to delete this employee?
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                                  <button type="button" class="btn btn-danger" id="confirm-delete-btn">Yes, delete</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                  </div>
+
+                  <!-- Modal for adding new employee -->
+      <div class="modal fade" id="addEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addEmployeeModalLabel">Add New Employee</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+              <!-- Form for adding a new employee -->
+              <div class="form-group">
+                <label for="employee-name">Name</label>
+                <input type="text" class="form-control" id="employee-name" required>
+              </div>
+              <div class="form-group">
+                <label for="employee-middle-name">Middle Name</label>
+                <input type="text" class="form-control" id="employee-middle-name">
+              </div>
+              <div class="form-group">
+                <label for="employee-last-name">Last Name</label>
+                <input type="text" class="form-control" id="employee-last-name" required>
+              </div>
+              <div class="form-group">
+                  <label for="employee-role">Role</label>
+                  <select class="form-control" id="employee-role" required>
+                    <option value="Customer">Customer (Ordering/Menu)</option>
+                    <option value="Cashier">Cashier</option>
+                    <option value="Cook">Cook</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                <label for="employee-contact">Contact Number</label>
+                <input type="number" class="form-control" id="employee-contact" required>
+              </div>
+              <div class="form-group">
+                <label for="employee-address">Address</label>
+                <input type="text" class="form-control" id="employee-address" required>
+              </div>
+              <div class="form-group">
+                <label for="employee-email">Email</label>
+                <input type="email" class="form-control" id="employee-email" required>
+              </div>
+              <div class="form-group">
+                <label for="employee-password">Password</label>
+                <input type="password" class="form-control" id="employee-password" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="save-add-employee-btn-modal">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<!-- Modal for displaying employee details -->
+    <div class="modal fade" id="employeeDetailsModal" tabindex="-1" role="dialog" aria-labelledby="employeeDetailsModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="employeeDetailsModalLabel">Employee Details</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="employeeDetailsBody">
+                <!-- Form for displaying and editing employee details -->
+                <form id="editEmployeeForm">
+                  <div class="form-group">
+                    <label for="employee-id">Employee ID</label>
+                    <input type="text" class="form-control" id="employee-id-view" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label for="employee-name">Name</label>
+                    <input type="text" class="form-control" id="employee-name-view" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="employee-middle-name">Middle Name</label>
+                    <input type="text" class="form-control" id="employee-middle-name-view">
+                  </div>
+                  <div class="form-group">
+                    <label for="employee-last-name">Last Name</label>
+                    <input type="text" class="form-control" id="employee-last-name-view" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="employee-role">Role</label>
+                    <select class="form-control" id="employee-role-view" required>
+                      <option value="Customer">Customer (Ordering/Menu)</option>
+                      <option value="Cashier">Cashier</option>
+                      <option value="Cook">Cook</option>
+                      <option value="Admin">Admin</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="employee-contact">Contact Number</label>
+                    <input type="number" class="form-control" id="employee-contact-view" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="employee-address">Address</label>
+                    <input type="text" class="form-control" id="employee-address-view" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="employee-email">Email</label>
+                    <input type="email" class="form-control" id="employee-email-view" required>
+                  </div>
+                    <!-- Add password field with eye icon -->
+                  <div class="form-group">
+                    <label for="employee-password-view">Password</label>
+                    <div class="input-group">
+                      <input type="password" class="form-control" id="employee-password-view" >
+                      <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                          <i class="fa fa-eye"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- End of password field -->
+                    <button type="button" class="btn btn-primary" id="save-edit-employee-btn-view">Save</button>
+                </form>
+          </div>
+        </div>
+      </div>
+    </div>
+            </div>
+            <!-- Sales - END -->
+            <div class="col-7 product-container">
+                <h2>Product maintenance...</h2>
+            </div>
+            <!-- Content - START -->
+            <div class="transactions-container col-7 d-none">
+                <h1>take orders</h1>
+            </div>
+            <!-- Content - END -->
+            <!-- Content - START -->
+            <div class="notifications-container col-7 d-none">
+                <h1>notif</h1>
+            </div>
+            <!-- Content - END -->
+            <!-- Content - START -->
+            <div class="reports-container col-7 d-none">
+                <h1>reports</h1>
+            </div>
+            <!-- Content - END -->
+            <!-- Content - START -->
+            <div class="settings-container col-7 d-none">
+                <h1>settings</h1>
+            </div>
+            <!-- Content - END -->
+        </div>
+    </div>
+    <!-- Body - END -->
+<!-- Bootstrap and Firebase Scripts -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<!-- Firebase Auth Script -->
+<script type="module" src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js"></script>
+    <script src="js/adminNav.js"></script>
+
+    <script type="module">
+// Import Firebase authentication functions
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
+        authDomain: "lory-c64ec.firebaseapp.com",
+        projectId: "lory-c64ec",
+        storageBucket: "lory-c64ec.appspot.com",
+        messagingSenderId: "371071401749",
+        appId: "1:371071401749:web:f5f5ef959488fcfd78b31c",
+        measurementId: "G-TXBTQ3L6XE"
+      };
+// Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const firestore = getFirestore(app);
+
+// Function to display existing employees in the table
+const displayEmployees = async () => {
+    const employeeTableBody = document.getElementById('employee-table-body');
+          try {
+              // Retrieve existing employees from Firestore
+              const querySnapshot = await getDocs(collection(firestore, 'employees'));
+
+              // Clear existing table rows
+              employeeTableBody.innerHTML = '';
+
+                        // Populate table with employee data
+                querySnapshot.forEach((doc) => {
+                    const employee = doc.data();
+                    const row = `
+                        <tr id="${doc.id}" class="employee-row">
+                            <!-- Remove the <td> for Employee ID -->
+                            <td>${employee.name} ${employee.middleName} ${employee.lastName}</td>
+                            <td>${employee.role}</td>
+                            <td>
+                                <button type="button" class="btn btn-primary edit-btn">Edit</button> <!-- Added Edit button -->
+                                <button type="button" class="btn btn-danger delete-btn">Delete</button>
+
+                            </td>
+                        </tr>
+                    `;
+                    employeeTableBody.innerHTML += row;
+                });
+        // Attach event listeners to each delete button
+              const deleteButtons = document.querySelectorAll('.delete-btn');
+              deleteButtons.forEach((button) => {
+                button.addEventListener('click', async () => {
+                  const employeeId = button.parentElement.parentElement.id;
+                  console.log('Clicked delete button for employee ID:', employeeId);
+                  
+                  // Show confirmation modal
+                  $('#confirmDeleteModal').modal('show');
+
+                  // Attach event listener to confirm deletion
+                  document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+                    // Delete employee only if confirmed
+                    await deleteEmployee(employeeId);
+                    // Close the confirmation modal
+                    $('#confirmDeleteModal').modal('hide');
+                  });
+                });
+              });
+
+              // Attach event listeners to each edit button
+              const editButtons = document.querySelectorAll('.edit-btn');
+              editButtons.forEach((button) => {
+                  button.addEventListener('click', async () => {
+                      const employeeId = button.parentElement.parentElement.id;
+                      console.log('Clicked edit button for employee ID:', employeeId);
+
+                      // Retrieve employee details and open edit modal
+                      await openEditModal(employeeId);
+                  });
+              });
+
+
+          } catch (error) {
+              console.error("Error displaying employees:", error);
+          }
+};
+
+// Attach event listener for the delete button outside the displayEmployees() function
+document.addEventListener('click', async (event) => {
+    const target = event.target;
+    if (target.classList.contains('delete-btn')) {
+        const employeeId = target.parentElement.parentElement.id;
+        console.log('Clicked delete button for employee ID:', employeeId);
+
+        // Show confirmation modal
+        $('#confirmDeleteModal').modal('show');
+
+        // Attach event listener to confirm deletion
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            // Delete employee only if confirmed
+            await deleteEmployee(employeeId);
+            // Close the confirmation modal
+            $('#confirmDeleteModal').modal('hide');
+        });
+    }
+});
+
+const openEditModal = async (employeeId) => {
+    try {
+        const docSnapshot = await getDoc(doc(firestore, 'employees', employeeId));
+        const employee = docSnapshot.data();
+        
+        // Populate the modal body with employee details
+        document.getElementById('employee-id-view').value = employeeId; // Set the Firestore document ID in the modal
+        document.getElementById('employee-name-view').value = employee.name;
+        document.getElementById('employee-middle-name-view').value = employee.middleName;
+        document.getElementById('employee-last-name-view').value = employee.lastName;
+        document.getElementById('employee-role-view').value = employee.role;
+        document.getElementById('employee-contact-view').value = employee.contact;
+        document.getElementById('employee-address-view').value = employee.address;
+        document.getElementById('employee-email-view').value = employee.email;
+        document.getElementById('employee-password-view').value = employee.password; // Populate the password field
+
+        // Display the modal
+        $('#employeeDetailsModal').modal('show');
+    } catch (error) {
+        console.error("Error getting employee details:", error);
+    }
+};
+
+
+// Function to add a new employee to Firestore
+const addEmployee = async (name, middleName, lastName, role, contact, address, email, password) => {
+    try {
+        // Add employee to Firestore
+        await addDoc(collection(firestore, 'employees'), {
+            name: name,
+            middleName: middleName,
+            lastName: lastName,
+            role: role,
+            contact: contact,
+            address: address,
+            email: email,
+            password: password // Include password field
+        });
+
+        // Create a new user account with email and password using Firebase Authentication
+        await createUserWithEmailAndPassword(auth, email, password);
+
+        console.log('Employee added successfully');
+        // Refresh the table to reflect the changes
+        displayEmployees();
+    } catch (error) {
+        console.error('Error adding employee:', error);
+    }
+};
+
+
+
+const updateEmployee = async (employeeId, name, middleName, lastName, role, contact, address, email, password) => {
+    try {
+        const employeeRef = doc(firestore, 'employees', employeeId);
+        const employeeSnapshot = await getDoc(employeeRef);
+        
+        // Check if the document exists before updating
+        if (employeeSnapshot.exists()) {
+            // Update employee document in Firestore
+            await updateDoc(employeeRef, {
+                name: name,
+                middleName: middleName,
+                lastName: lastName,
+                role: role,
+                contact: contact,
+                address: address,
+                email: email,
+                password: password // Include password field in update
+            });
+
+            console.log('Employee updated successfully:', employeeId);
+        } else {
+            console.error('Employee document not found:', employeeId);
+        }
+    } catch (error) {
+        console.error('Error updating employee:', error);
+    }
+};
+
+// Function to delete employee from Firestore
+const deleteEmployee = async (employeeId) => {
+    try {
+        // Delete employee document from Firestore
+        await deleteDoc(doc(firestore, 'employees', employeeId));
+        console.log('Employee deleted successfully');
+        
+        // Refresh the table to reflect the changes
+        displayEmployees();
+    } catch (error) {
+        console.error("Error deleting employee:", error);
+    }
+};
+window.onload = () => {
+    displayEmployees();
+
+      // Check authentication state when the page loads
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // If user is not logged in, redirect to login page
+            window.location.href = 'index.html';
+        }
+    });
+
+
+    // Logout button event listener
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
+            // Sign out the user
+            await signOut(auth);
+            // Redirect to login page
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
+    });
+};
+
+// Event listener for save button in addEmployeeModal
+document.getElementById('save-add-employee-btn-modal').addEventListener('click', async () => {
+    try {
+        const name = document.getElementById('employee-name').value.trim();
+        const middleName = document.getElementById('employee-middle-name').value.trim();
+        const lastName = document.getElementById('employee-last-name').value.trim();
+        const role = document.getElementById('employee-role').value.trim();
+        const contact = document.getElementById('employee-contact').value.trim();
+        const address = document.getElementById('employee-address').value.trim();
+        const email = document.getElementById('employee-email').value.trim();
+        const password = document.getElementById('employee-password').value.trim(); // Capture password input value
+
+        // Add new employee to Firestore with password
+        await addEmployee(name, middleName, lastName, role, contact, address, email, password);
+
+        // Close the modal
+        $('#addEmployeeModal').modal('hide');
+
+        // Clear form fields
+        document.getElementById('employee-name').value = '';
+        document.getElementById('employee-middle-name').value = '';
+        document.getElementById('employee-last-name').value = '';
+        document.getElementById('employee-role').value = '';
+        document.getElementById('employee-contact').value = '';
+        document.getElementById('employee-address').value = '';
+        document.getElementById('employee-email').value = '';
+        document.getElementById('employee-password').value = ''; // Clear password input
+    } catch (error) {
+        console.error('Error saving employee:', error);
+    }
+});
+
+document.getElementById('save-edit-employee-btn-view').addEventListener('click', async () => {
+    try {
+        // Retrieve input values from the modal
+        const employeeId = document.getElementById('employee-id-view').value.trim();
+        const name = document.getElementById('employee-name-view').value.trim();
+        const middleName = document.getElementById('employee-middle-name-view').value.trim();
+        const lastName = document.getElementById('employee-last-name-view').value.trim();
+        const role = document.getElementById('employee-role-view').value.trim();
+        const contact = document.getElementById('employee-contact-view').value.trim();
+        const address = document.getElementById('employee-address-view').value.trim();
+        const email = document.getElementById('employee-email-view').value.trim();
+        const password = document.getElementById('employee-password-view').value.trim(); // Retrieve updated password
+
+        // Update employee details in Firestore, including password
+        await updateEmployee(employeeId, name, middleName, lastName, role, contact, address, email, password);
+
+        // Close the modal
+        $('#employeeDetailsModal').modal('hide');
+
+        // Refresh the table to reflect the changes
+        displayEmployees(); // Call the displayEmployees function
+    } catch (error) {
+        console.error('Error saving employee details:', error);
+    }
+});
+document.getElementById('toggle-password').addEventListener('click', function() {
+    var passwordInput = document.getElementById('employee-password-view');
+    var icon = document.getElementById('toggle-password').querySelector('i');
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = "password";
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  });
+    </script>
+
+     <!--   Core JS Files   -->
+  <script src="assets/js/plugins/chartjs.min.js"></script>
+  <script>
+    var ctx = document.getElementById("chart-bars").getContext("2d");
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+          label: "Sales",
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 4,
+          borderSkipped: false,
+          backgroundColor: "#fff",
+          data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
+          maxBarThickness: 6
+        }, ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false,
+            },
+            ticks: {
+              suggestedMin: 0,
+              suggestedMax: 500,
+              beginAtZero: true,
+              padding: 15,
+              font: {
+                size: 14,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+              color: "#fff"
+            },
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false
+            },
+            ticks: {
+              display: false
+            },
+          },
+        },
+      },
+    });
+
+
+    var ctx2 = document.getElementById("chart-line").getContext("2d");
+
+    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
+    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+
+    var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
+    gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+
+    new Chart(ctx2, {
+      type: "line",
+      data: {
+        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+            label: "Mobile apps",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#cb0c9f",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+            maxBarThickness: 6
+
+          },
+          {
+            label: "Websites",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#3A416F",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
+            maxBarThickness: 6
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              padding: 10,
+              color: '#b2b9bf',
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              color: '#b2b9bf',
+              padding: 20,
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+        },
+      },
+    });
+  </script>
+</body>
+</html>
