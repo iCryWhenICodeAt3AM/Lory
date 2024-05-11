@@ -63,7 +63,6 @@ function filterItems(category) {
                 const dishId = doc.id;
                 const dishTag = data.tag;
                 console.log(`Tag ID: ${dishId}, Name: ${dishTag}`);
-
                 // Fetch items within the "items" subcollection for the current document
                 db.collection("foods").doc(dishId).collection("items").get().then((itemSnapshot) => {
                     let htmlContent = ''; // Initialize HTML content string
@@ -80,8 +79,6 @@ function filterItems(category) {
                         // Reset htmlContent for the next document
                         htmlContent = '';
                     });
-
-                    
                 }).catch((error) => {
                     console.log("Error getting items: ", error);
                 });
@@ -183,7 +180,6 @@ document.getElementById('orderModal').addEventListener('show.bs.modal', function
     });
 });
 
-// Modal Order Button
 function placeOrder() {
     const quantity = parseInt(document.getElementById('quantity').value);
     const itemName = document.querySelector('.modal-title').textContent.split('Order ')[1];
@@ -193,28 +189,48 @@ function placeOrder() {
     // Generate Row Id
     const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
 
-    // Create HTML content for the ordered item
-    const orderHTML = `
-        <div class="row mt-1 mb-1 row-items" id="${rowId}">
-            <div class="col-2 list-item p-0 mt-2 qty">${quantity}</div>
-            <div class="col-6 list-item p-0 mt-2 item">${itemName}</div>
-            <div class="col-2 list-item p-0 mt-2 total">${totalPrice}</div>
-            <div class="col-2 list-item p-0"><button class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${itemName}', ${totalPrice}, ${quantity}, '${rowId}')">X</button></div>
-        </div>
-    `;
+    // Check if there is an existing row for the item
+    let existingRow = null;
+    const rows = document.querySelectorAll('.order-items .row-items');
+    rows.forEach(row => {
+        const itemNameInRow = row.querySelector('.item').textContent;
+        if (itemNameInRow === itemName) {
+            existingRow = row;
+        }
+    });
 
-    // Append the HTML content to the specified element
-    document.querySelector('.order-items').innerHTML += orderHTML;
+    if (existingRow) {
+        // If an existing row is found, update the quantity
+        const existingQuantity = parseInt(existingRow.querySelector('.qty').textContent);
+        const newQuantity = existingQuantity + quantity;
+        existingRow.querySelector('.qty').textContent = newQuantity;
+        const existingTotal = parseFloat(existingRow.querySelector('.total').textContent);
+        const newTotalPrice = existingTotal + parseFloat(totalPrice);
+        existingRow.querySelector('.total').textContent = newTotalPrice.toFixed(0);
+    } else {
+        // If no existing row is found, create a new row for the item
+        const orderHTML = `
+            <div class="row mt-1 mb-1 row-items">
+                <div class="col-2 list-item p-0 mt-2 qty">${quantity}</div>
+                <div class="col-6 list-item p-0 mt-2 item">${itemName}</div>
+                <div class="col-2 list-item p-0 mt-2 total">${totalPrice}</div>
+                <div class="col-2 list-item p-0"><button class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${itemName}', ${totalPrice}, ${quantity}, '${rowId}')">X</button></div>
+            </div>
+        `;
+        // Append the new row to the order items
+        document.querySelector('.order-items').innerHTML += orderHTML;
+    }
 
     // Update the order total
     updateOrderTotal(totalPrice);
 
     // Close the modal
-    // Hide the modal
     const orderModal = document.getElementById('orderModal');
     const modal = bootstrap.Modal.getInstance(orderModal);
     modal.hide();
 }
+
+
 // Confirm Modal
 function openConfirmationModal(itemName, totalPrice, quantity, rowId) {
     // Display the item name and total price in the confirmation modal
@@ -269,7 +285,7 @@ document.querySelector('#confirmationModal .btn-close').addEventListener('click'
 function submit() {
     const details = [];
     const currentDate = new Date();
-    const rows = document.querySelectorAll('.row-items');
+    const rows = document.querySelectorAll('.order-items .row-items');
     const customerid = Math.floor(Math.random() * 200) + 1;
     const tableid = Math.floor(Math.random() * 12) + 1;
     const date = firebase.firestore.Timestamp.fromDate(currentDate);
@@ -285,7 +301,7 @@ function submit() {
     });
 
     // Save order details to Firestore
-    const orderRef = db.collection("orders").doc("BawoijACJlbVRi8sHQqI").collection("queue").doc();
+    const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc();
     const orderData = {
         customerid,
         tableid,
@@ -318,4 +334,40 @@ function submit() {
     });
 }
 
+// Function to remove all row-items from the place-order div
+function removeRowItems() {
+    // Get all elements with the class "row-items" inside the place-order div
+    const rowItems = document.querySelectorAll('.place-order .row-items');
+    
+    // Loop through each row-item and remove it
+    rowItems.forEach(rowItem => {
+        rowItem.remove();
+    });
+}
 
+// Function to copy row items to the place-order div
+function copyRowItems() {
+    // Remove all existing row-items from the place-order div
+    removeRowItems();
+
+    // Get all elements with the class "row-items"
+    const rowItems = document.querySelectorAll('.order-items .row-items');
+
+    // Get the text content from the element with id "order-total-list"
+    const orderTotal = document.getElementById('order-total-list').textContent;
+
+    // Set the text content of the element with id "place-order-total" to the retrieved text content
+    document.getElementById('place-order-total').textContent = orderTotal;
+
+    // Get the place-order div
+    const placeOrderDiv = document.querySelector('.place-order');
+
+    // Loop through each row-item
+    rowItems.forEach(rowItem => {
+        // Create a copy of the row-item
+        const copy = rowItem.cloneNode(true);
+        
+        // Append the copy to the place-order div
+        placeOrderDiv.appendChild(copy);
+    });
+}

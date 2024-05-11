@@ -98,42 +98,42 @@ function completedButtonAdjust(){
 }
 // 
 // Verification Button
-verification();
-function verification(){
-    documentId = "";
-    resetDetailsList();
-    // Show the content when the item is clicked
-    document.querySelectorAll('.dashboard-button').forEach(button => {
-        button.classList.add('btn-outline-dark');
-        button.classList.remove('btn-success');
-        button.classList.remove('disabled');
-    });
-    document.querySelector(".verification").classList.remove("btn-outline-dark");
-    document.querySelector(".verification").classList.add("disabled");
-    document.querySelector(".verification").classList.add("btn-success");
-    document.getElementById('list').innerHTML = "";
-    db.collection("orders").doc("BawoijACJlbVRi8sHQqI").collection("queue").orderBy("date", "desc").get().then((itemSnapshot) => {
-        itemSnapshot.forEach((itemDoc) => {
-            const itemData = itemDoc.data();
-            const tableid = itemData.tableid;
-            const customerid = itemData.customerid;
-            const status = itemData.status;
-            const total = itemData.total;
-            const date = itemData.date;
+pending();
+// function verification(){
+//     documentId = "";
+//     resetDetailsList();
+//     // Show the content when the item is clicked
+//     document.querySelectorAll('.dashboard-button').forEach(button => {
+//         button.classList.add('btn-outline-dark');
+//         button.classList.remove('btn-success');
+//         button.classList.remove('disabled');
+//     });
+//     document.querySelector(".verification").classList.remove("btn-outline-dark");
+//     document.querySelector(".verification").classList.add("disabled");
+//     document.querySelector(".verification").classList.add("btn-success");
+//     document.getElementById('list').innerHTML = "";
+//     db.collection("orders").doc("BawoijACJlbVRi8sHQqI").collection("queue").orderBy("date", "desc").get().then((itemSnapshot) => {
+//         itemSnapshot.forEach((itemDoc) => {
+//             const itemData = itemDoc.data();
+//             const tableid = itemData.tableid;
+//             const customerid = itemData.customerid;
+//             const status = itemData.status;
+//             const total = itemData.total;
+//             const date = itemData.date;
             
-            // Construct HTML for each row
-            document.getElementById('list').innerHTML += `
-                <tr id="verification-list">
-                    <td>${tableid}</td>
-                    <td>${customerid}</td>
-                    <td>${total}</td>
-                    <td>${status}</td>
-                    <td><button class="btn btn-sm btn-success list-button" id="${itemDoc.id}" onclick="getDetails('${itemDoc.id}')">Confirm</button></td>
-                </tr>
-            `;
-        });
-    });
-}
+//             // Construct HTML for each row
+//             document.getElementById('list').innerHTML += `
+//                 <tr id="verification-list">
+//                     <td>${tableid}</td>
+//                     <td>${customerid}</td>
+//                     <td>${total}</td>
+//                     <td>${status}</td>
+//                     <td><button class="btn btn-sm btn-success list-button" id="${itemDoc.id}" onclick="getDetails('${itemDoc.id}')">Confirm</button></td>
+//                 </tr>
+//             `;
+//         });
+//     });
+// }
 // Pending Button
 function pending(){
     documentId = "";
@@ -152,16 +152,17 @@ function pending(){
         itemSnapshot.forEach((itemDoc) => {
             const itemData = itemDoc.data();
             const tableid = itemData.tableid;
-            const customerid = itemData.customerid;
+            const customerid = itemData.date;
             const status = itemData.status;
             const total = itemData.total;
-            const date = itemData.date;
-            
+            const date = itemData.date.toDate();
+            const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
             // Construct HTML for each row
             document.getElementById('list').innerHTML += `
                 <tr id="pending-list">
                     <td>${tableid}</td>
-                    <td>${customerid}</td>
+                    <td>${timeString}</td>
                     <td>${total}</td>
                     <td>${status}</td>
                     <td><button class="btn btn-sm btn-success list-button" id="${itemDoc.id}" onclick="getDetails('${itemDoc.id}', 'dashboard')">Confirm</button></td>
