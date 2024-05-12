@@ -38,20 +38,14 @@
             <div class="logout-container col-10 text-end">
                 <div class="row">
                     <!-- Account Welcome -->
-
-                      <!-- Navbar for Hi Admin! and Logout dropdown -->
-                    <nav class="navbar navbar-light ">
-                      <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          Settings
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                          <a class="dropdown-item" id="logout-btn" href="#">Logout</a>
-                        </div>
-                      </div>
-                    </nav>
+                    <div class="col-7"></div>
+                    <div class="col-4 pt-4 mt-3 text-white">
+                        <h6>Welcome, Table 1</h6>
+                    </div>
                     <!-- Log-out -->
-
+                    <div class="col-1 p-4">
+                        <img src="images/logout-icon.svg" alt="Log-out Icon" width="100%" height="100%">
+                    </div>
                 </div>
             </div>
             <!-- Account Welcome and Log-out - START -->
@@ -97,6 +91,7 @@
           </div>
         </div>
       </div>
+
     <!-- Side Navigation -->
     <div class="container-fluid">
         <div class="row">
@@ -104,41 +99,54 @@
             <nav class="side-navigation col-2 d-flex flex-column">
                 <!-- New Item For Side Nav - START -->
                 <ul class="list-unstyled flex-grow-1">
-                    <li class="p-3 d-flex m-3 dashboard">
+                    <li class="p-3 d-flex m-3">
                         <img src="images/food-icon.svg" alt="Food Icon" width="25%" height="25%">
                         <div class="text-center flex-grow-1 pt-2">
-                            <h6>Dashboard</h6>
+                            <h6>Menu</h6>
                         </div>
                     </li>
                 </ul>
                 <!-- New Item For Side Nav - END -->
             </nav>
             <!-- Side Nav - END -->
-            <!-- Dashboard - START -->
-            <div class="col-7 dashboard-content">
-                <!-- Table - START -->
+            <!-- Content - START -->
+            <div class="col-7">
                 <div class="row">
-                    <div class="col-12 text-center table-responsive" style="max-height: 600px;">
-                        <table class="table items">
-                            <thead>
-                                <!-- Format if Verification -->
+                    <div class="col-12 table-container text-center d-flex justify-content-center">
+                        <!-- Pills -->
+                        <table class="table pills">
+                            <tbody>
                                 <tr>
-                                    <th>Table Number</th>
-                                    <th>Time</th>
-                                    <th>Completed</th>
-                                    <th>Pending</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <td><button class="btn btn-custom btn-active" onclick="filterItems('all')" id="all">ALL</button></td>
+                                    <td><button class="btn btn-custom" onclick="filterItems('special')" id="special">SPECIAL</button></td>
+                                    <td><button class="btn btn-custom" onclick="filterItems('main')" id="main">MAIN</button></td>
+                                    <td><button class="btn btn-custom" onclick="filterItems('beverages')" id="beverages">BEVERAGES</button></td>
                                 </tr>
-                            </thead>
-                            <tbody id="list">
-                                <!-- List Generation Here -->
+                                <tr>
+                                    <td><button class="btn btn-custom" onclick="filterItems('small-orders')" id="small-orders">SMALL ORDERS</button></td>
+                                    <td><button class="btn btn-custom" onclick="filterItems('appetizers')" id="appetizers">APPETIZERS</button></td>
+                                    <td><button class="btn btn-custom" onclick="filterItems('sides')" id="sides">SIDES</button></td>
+                                    <td><button class="btn btn-custom" onclick="filterItems('desserts')" id="desserts">DESSERTS</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-12 table-container text-center">
+                        <table class="table items">
+                            <tbody>
+                                <tr id="append-1">
+                                    <!-- Add more cells as needed -->
+                                </tr>
+                                <tr id="append-2">
+                                    <!-- Add more cells as needed -->
+                                </tr>
+                                <!-- Add more rows as needed -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <!-- Table - END -->
             </div>
+            <!-- Content - END -->
             <!-- Order List - START -->
             <div class="orderlist-container col-3 text-center">
                 <div class="order-list">
@@ -146,21 +154,36 @@
                         <!-- Customer ID -->
                         <div class="col-12">
                             <div class="customer-id m-2 pt-3 p-2">
-                                <h6><b>Table Number - #</b></h6>
+                                <h6><b>Customer ID - 0000000013</b></h6>
                             </div>
                             <!-- List -->
                         </div>
-                    </div>
-                    <div class="row" style="height: 600px;">
                         <!-- Order Items -->
-                        <div class="order-items col-10 offset-1 p-3 text-center" id="checklist-items" style="max-height: 450px; height: 450px;">
+                        <div class="order-items col-10 offset-1 p-3">
                             <!-- Headers -->
                             <div class="row mb-2">
-                                <div class="col-4 list-item p-0"><b class="h6">Quantity</b></div>
-                                <div class="col-4 list-item p-0"><b class="h6">Dishname</b></div>
-                                <div class="col-4 list-item p-0"><b class="h6">Actions</b></div>
+                                <div class="col-2 list-item p-0"><b>Qty</b></div>
+                                <div class="col-6 list-item p-0"><b>Item</b></div>
+                                <div class="col-2 list-item p-0"><b>Total</b></div>
+                                <div class="col-2 list-item p-0"><b>Act</b></div>
                             </div>
                             <!-- Contents -->
+                            
+                        </div>
+                        <div class="col-12 pt-3">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6><b>Order Total</b></h6>
+                                </div>
+                                <div class="col-12">
+                                    <h6 id="order-total">0</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-1">
+                            <button class="btn btn-c btn-outline-success">
+                                <img src="images/check.svg" alt="Check" height="100%" width="100%">
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -174,58 +197,7 @@
     <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase-storage.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase-firestore.js"></script>
     <script src="js/firestore.js"></script>
-    <script src="js/kitchenpersonnel.js"></script>
+    <script src="js/ordering.js"></script>
     <script src="js/bootstrap.min.js"></script>
-
-        <!-- Bootstrap and Firebase Scripts -->
-<script type="module" src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script type="module" src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-<!-- Firebase Auth Script -->
-<script type="module" src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js"></script>
-
-    <script type="module">
-    // Import Firebase authentication functions
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDT4iaPdleCjt7K2AYVDfEaZOi6UqDHCDU",
-    authDomain: "lory-c64ec.firebaseapp.com",
-    projectId: "lory-c64ec",
-    storageBucket: "lory-c64ec.appspot.com",
-    messagingSenderId: "371071401749",
-    appId: "1:371071401749:web:f5f5ef959488fcfd78b31c",
-    measurementId: "G-TXBTQ3L6XE"
-  };
-// Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const firestore = getFirestore(app);
-
-
-
-    onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            // If user is not logged in, redirect to login page
-            window.location.href = 'index.html';
-        }
-    });
-
-    // Logout button event listener
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-        try {
-            // Sign out the user
-            await signOut(auth);
-            // Redirect to login page
-            window.location.href = 'index.html';
-        } catch (error) {
-            console.error('Error signing out:', error);
-        }
-    });
-</script>
 </body>
 </html>

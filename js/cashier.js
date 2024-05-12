@@ -38,7 +38,7 @@ function resetDetailsList(){
                 <!-- Customer ID -->
                 <div class="col-12">
                     <div class="customer-id m-2 pt-3 p-2">
-                        <h6><b>Customer ID - 0000000013</b></h6>
+                        <h6><b>Table Number - #</b></h6>
                     </div>
                     <!-- List -->
                 </div>
@@ -98,42 +98,42 @@ function completedButtonAdjust(){
 }
 // 
 // Verification Button
-verification();
-function verification(){
-    documentId = "";
-    resetDetailsList();
-    // Show the content when the item is clicked
-    document.querySelectorAll('.dashboard-button').forEach(button => {
-        button.classList.add('btn-outline-dark');
-        button.classList.remove('btn-success');
-        button.classList.remove('disabled');
-    });
-    document.querySelector(".verification").classList.remove("btn-outline-dark");
-    document.querySelector(".verification").classList.add("disabled");
-    document.querySelector(".verification").classList.add("btn-success");
-    document.getElementById('list').innerHTML = "";
-    db.collection("orders").doc("BawoijACJlbVRi8sHQqI").collection("queue").orderBy("date", "desc").get().then((itemSnapshot) => {
-        itemSnapshot.forEach((itemDoc) => {
-            const itemData = itemDoc.data();
-            const tableid = itemData.tableid;
-            const customerid = itemData.customerid;
-            const status = itemData.status;
-            const total = itemData.total;
-            const date = itemData.date;
+pending();
+// function verification(){
+//     documentId = "";
+//     resetDetailsList();
+//     // Show the content when the item is clicked
+//     document.querySelectorAll('.dashboard-button').forEach(button => {
+//         button.classList.add('btn-outline-dark');
+//         button.classList.remove('btn-success');
+//         button.classList.remove('disabled');
+//     });
+//     document.querySelector(".verification").classList.remove("btn-outline-dark");
+//     document.querySelector(".verification").classList.add("disabled");
+//     document.querySelector(".verification").classList.add("btn-success");
+//     document.getElementById('list').innerHTML = "";
+//     db.collection("orders").doc("BawoijACJlbVRi8sHQqI").collection("queue").orderBy("date", "desc").get().then((itemSnapshot) => {
+//         itemSnapshot.forEach((itemDoc) => {
+//             const itemData = itemDoc.data();
+//             const tableid = itemData.tableid;
+//             const customerid = itemData.customerid;
+//             const status = itemData.status;
+//             const total = itemData.total;
+//             const date = itemData.date;
             
-            // Construct HTML for each row
-            document.getElementById('list').innerHTML += `
-                <tr id="verification-list">
-                    <td>${tableid}</td>
-                    <td>${customerid}</td>
-                    <td>${total}</td>
-                    <td>${status}</td>
-                    <td><button class="btn btn-sm btn-success list-button" id="${itemDoc.id}" onclick="getDetails('${itemDoc.id}')">Confirm</button></td>
-                </tr>
-            `;
-        });
-    });
-}
+//             // Construct HTML for each row
+//             document.getElementById('list').innerHTML += `
+//                 <tr id="verification-list">
+//                     <td>${tableid}</td>
+//                     <td>${customerid}</td>
+//                     <td>${total}</td>
+//                     <td>${status}</td>
+//                     <td><button class="btn btn-sm btn-success list-button" id="${itemDoc.id}" onclick="getDetails('${itemDoc.id}')">Confirm</button></td>
+//                 </tr>
+//             `;
+//         });
+//     });
+// }
 // Pending Button
 function pending(){
     documentId = "";
@@ -155,12 +155,14 @@ function pending(){
             const customerid = itemData.customerid;
             const status = itemData.status;
             const total = itemData.total;
-            const date = itemData.date;
-            
+            const date = itemData.date.toDate();
+            const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
             // Construct HTML for each row
             document.getElementById('list').innerHTML += `
                 <tr id="pending-list">
                     <td>${tableid}</td>
+                    <td>${timeString}</td>
                     <td>${customerid}</td>
                     <td>${total}</td>
                     <td>${status}</td>
@@ -188,16 +190,18 @@ function completed(){
         itemSnapshot.forEach((itemDoc) => {
             const itemData = itemDoc.data();
             const tableid = itemData.tableid;
-            const customerid = itemData.customerid;
             const status = itemData.status;
             const total = itemData.total;
-            const date = itemData.date;
-            
+            const customerid = itemData.customerid;
+            const date = itemData.date.toDate();
+            const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
             // Construct HTML for each row
 
             document.getElementById('list').innerHTML += `
                 <tr id="pending-list" class="${itemDoc.id}">
                     <td>${tableid}</td>
+                    <td>${timeString}</td>
                     <td>${customerid}</td>
                     <td>${total}</td>
                     <td>${status}</td>
@@ -213,7 +217,7 @@ function getDetails(docId, operation){
     let sales = false;
     const verifyButton = document.querySelector('.verify');
     const cancelButton = document.querySelector('.cancel');
-    const salesIdentifier = document.querySelector('.sales');
+
     if (operation == 'sales'){
         sales = true;
         labelId = docId;
@@ -251,7 +255,6 @@ function getDetails(docId, operation){
         }
     }
     
-    console.log(sales);
     total = 0;
     // If the document was only clicked once
     if(documentId != docId){
@@ -265,8 +268,22 @@ function getDetails(docId, operation){
         document.getElementById(`${docId}`).classList.remove('btn-success');
         document.getElementById(`${docId}`).classList.add('btn-danger');
         document.getElementById(`${docId}`).innerHTML = "X";
+        // For changing ID
+        const customerIDElement = document.querySelector(".customer-id h6 b");
         if(sales){
-            console.log("Sales = True");
+            // console.log("Sales = True");
+            // If sales mode, fetch the customer ID from the sales collection
+            db.collection("sales").doc(labelId).get().then((doc) => {
+                if (doc.exists) {
+                    const customerID = doc.data().tableId;
+                    customerIDElement.textContent = `Table Number - ${customerID}`;
+                } else {
+                    console.log("No such document!");
+                }
+            }).catch((error) => {
+                console.log("Error getting customer ID:", error);
+            });
+            // ---
             db.collection("sales").doc(labelId).collection("details").get().then((detailSnapshot) => {
                 detailSnapshot.forEach((detailDoc) => {
                     const detailData = detailDoc.data();
@@ -281,13 +298,25 @@ function getDetails(docId, operation){
                     </div>
                 `;
                 total += parseFloat(detailData.total);
-                console.log(total)
+                // console.log(total)
                 document.querySelector(".order-total-sales").innerHTML = total.toFixed(0);
                 });
             }).catch((error) => {
                 console.log("Error getting details:", error);
             });
         } else {
+            // change the table Id
+            db.collection("orders").doc(labelId).collection("queue").doc(docId).get().then((doc) => {
+                if (doc.exists) {
+                    const tableId = doc.data().tableid;
+                    customerIDElement.textContent = `Table Number - ${tableId}`;
+                } else {
+                    console.log("No such document!");
+                }
+            }).catch((error) => {
+                console.log("Error getting customer ID:", error);
+            });
+            // ---
             // Get details from the same collection for the current itemDoc
             db.collection("orders").doc(labelId).collection("queue").doc(docId).collection("details").get().then((detailSnapshot) => {
                 detailSnapshot.forEach((detailDoc) => {
@@ -337,7 +366,7 @@ function toggleStatus(docId) {
             // Update the status field with the new status
             docRef.update({ status: newStatus }).then(() => {
                 console.log("Status updated successfully.");
-                document.querySelector(`.${docId}`).cells[3].textContent = newStatus;
+                document.querySelector(`.${docId}`).cells[4].textContent = newStatus;
             }).catch((error) => {
                 console.error("Error updating status:", error);
             });
