@@ -285,6 +285,7 @@ async function submit() {
     const date = firebase.firestore.Timestamp.fromDate(currentDate);
     const status = "pending";
     const total = document.getElementById("order-total-list").innerHTML;
+    const docId = localStorage.getItem("userDocId");
 
     try {
         // Get the highest customer id
@@ -323,14 +324,79 @@ async function submit() {
 
         // Commit batch
         await batch.commit();
-
-        console.log("Order and details saved successfully!");
+        // console.log("Order and details saved successfully!");
         alert("Order and details saved successfully!");
+
+        // Get the document ID of the newly created order
+        const orderId = orderRef.id;
+        localStorage.setItem("orderId", orderId);
+        console.log("Document ID of the newly created order:", orderId);
+
+        // Update employee status
+        const docRef = db.collection("employees").doc(docId);
+
+        try {
+            await docRef.update({
+                occupantOrderId: orderId, // Assuming orderId is the value you want to set for occupantOrderId
+                occupied: true
+            });
+            console.log("Fields updated successfully!");
+        } catch (error) {
+            console.error("Error updating fields:", error);
+        }
     } catch (error) {
         console.error("Error saving order and details: ", error);
         alert("Error saving order. Please call on a staff.");
     }
 }
+
+async function followUpOrder() {
+    try {
+        const currentDate = new Date();
+        const total = document.getElementById("order-total-list").innerHTML;
+        const rows = document.querySelectorAll('.order-items .row-items');
+        const orderId = localStorage.getItem("orderId");
+        const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(orderId);
+
+        // Step 1: Update existing fields in the document
+        const updateData = {
+            date: currentDate,
+            tota: total,
+            status: "pending"
+        };
+
+        orderRef.update(updateData)
+        .then(() => {
+            console.log('Document updated successfully');
+        })
+        .catch((error) => {
+            console.error('Error updating document:', error);
+        });
+
+        const batch = db.batch();
+        const detailsCollection = orderRef.collection("details");
+
+        // Add details to batch
+        rows.forEach((row, index) => {
+            const qtyHTML = row.querySelector('.qty').innerHTML;
+            const itemHTML = row.querySelector('.item').innerHTML;
+            const totalHTML = row.querySelector('.total').innerHTML;
+            const detailData = {
+                qty: qtyHTML,
+                dish: itemHTML,
+                total: totalHTML
+            };
+            batch.set(detailsCollection.doc(`${index+1}`), detailData);
+        });
+
+        // Commit batch
+        await batch.commit();
+
+    } catch (error) {
+        console.error("Error adding new item:", error);
+    }
+}
+
 
 // Function to get the highest customer id
 async function getHighestCustomerId() {
@@ -356,9 +422,9 @@ async function getHighestCustomerId() {
 
 
 // Function to remove all row-items from the place-order div
-function removeRowItems() {
+function removeRowItems(location) {
     // Get all elements with the class "row-items" inside the place-order div
-    const rowItems = document.querySelectorAll('.place-order .row-items');
+    const rowItems = document.querySelectorAll('.'+location+' .row-items');
     
     // Loop through each row-item and remove it
     rowItems.forEach(rowItem => {
@@ -367,9 +433,9 @@ function removeRowItems() {
 }
 
 // Function to copy row items to the place-order div
-function copyRowItems() {
+async function copyRowItems(info, order) {
     // Remove all existing row-items from the place-order div
-    removeRowItems();
+    removeRowItems(info);
 
     // Get all elements with the class "row-items"
     const rowItems = document.querySelectorAll('.order-items .row-items');
@@ -378,10 +444,10 @@ function copyRowItems() {
     const orderTotal = document.getElementById('order-total-list').textContent;
 
     // Set the text content of the element with id "place-order-total" to the retrieved text content
-    document.getElementById('place-order-total').textContent = orderTotal;
+    document.getElementById(order).textContent = orderTotal;
 
     // Get the place-order div
-    const placeOrderDiv = document.querySelector('.place-order');
+    const placeOrderDiv = document.querySelector('.'+info);
 
     // Loop through each row-item
     rowItems.forEach(rowItem => {
@@ -394,4 +460,118 @@ function copyRowItems() {
         // Append the copy to the place-order div
         placeOrderDiv.appendChild(copy);
     });
+}
+
+async function checkOnload() {
+    // Get the user's document ID from local storage
+    const submitButton = document.getElementById("submitButton");
+    const docId = localStorage.getItem("userDocId");
+    console.log(docId);
+    // Reference to the user's document in the "employees" collection
+    const docRef = db.collection("employees").doc(docId);
+    let occupied, occupantDocId;
+    try {
+        // Get the user's document data
+        const docSnapshot = await docRef.get();
+        if (docSnapshot.exists) {
+            // Extract occupied and occupantDocId from the user's document data
+            
+            const dataRef = docSnapshot.data();
+            occupied = dataRef.occupied;
+            occupantDocId = dataRef.occupantOrderId;
+            // console.log(occupied, occupantDocId);
+            if (occupied) {
+                // If occupied, fetch the order data using occupantDocId
+                const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(occupantDocId);
+                const orderSnapshot = await orderRef.get();
+                
+                if (orderSnapshot.exists) {
+                    // Display order details
+                    await displayOrderItems(orderRef); // Implement this function to display order items
+                    
+                    // Open the final modal
+                    openFinalModal();
+                    submitButton.setAttribute("onclick", "followUpOrder();copyRowItems('final-order', 'final-order-total')")
+                } else {
+                    console.error("Order document does not exist.");
+                }
+            } else {
+                console.log("A user is not occupying a table.");
+            }
+        } else {
+            console.error("User document not found.");
+        }
+    } catch (error) {
+        console.error("Error retrieving user information:", error);
+    }
+}
+
+async function displayOrderItems(orderRef) {
+    // Iterate over each item in the details array
+    const detailsRef = orderRef.collection("details"); // Reference to the "details" subcollection
+    const detailsSnapshot = await detailsRef.get(); // Get all documents within the "details" subcollection
+    let sum = 0;
+
+    detailsSnapshot.forEach((doc) => {
+        // Access individual document data here using doc.data()
+        const data = doc.data();
+        // console.log(data); // Example: Log each document's data
+        // Extract individual item properties   
+        const qty = data.qty;
+        const dish = data.dish;
+        const total = data.total;
+        sum += parseInt(total); 
+        // Generate a unique row id for each item
+        const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
+
+        // Generate HTML for the current item
+        const orderHTML = `
+            <div class="row mt-1 mb-1 row-items" id="${rowId}">
+                <div class="col-2 list-item p-0 mt-2 qty">${qty}</div>
+                <div class="col-6 list-item p-0 mt-2 item">${dish}</div>
+                <div class="col-2 list-item p-0 mt-2 total">${total}</div>
+                <div class="col-2 list-item p-0">
+                    <button class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${dish}', ${total}, ${qty}, '${rowId}')" disabled>X</button>
+                </div>
+            </div>
+        `;
+
+        // Append the generated HTML for the current item to the order items section
+        document.querySelector('.order-items').innerHTML += orderHTML;
+        
+    });
+    document.getElementById('order-total-list').innerHTML = sum;
+}
+
+
+function openFinalModal() {
+    // Implement this function to open the final modal
+   // Get a reference to the modal element
+    const modal = document.getElementById('finalModal');
+
+    copyRowItems('final-order', 'final-order-total');
+    $('#finalModal').modal('show');
+}
+
+function hideModal(){
+    $('#finalModal').modal('hide');
+}
+
+async function billOut(){
+    // update the status into bill-out
+    // notify on the cashier side
+    // remove the occupant and occupantOrderId
+    // Update employee status
+    const docId = localStorage.getItem("userDocId");
+    const docRef = db.collection("employees").doc(docId);
+
+        try {
+            await docRef.update({
+                occupantOrderId: firebase.firestore.FieldValue.delete(),
+                occupied: firebase.firestore.FieldValue.delete() 
+            });
+            alert("Bill-out notified. Please wait for the waiter.");
+        } catch (error) {
+            console.error("Error updating fields:", error);
+        }
 }
