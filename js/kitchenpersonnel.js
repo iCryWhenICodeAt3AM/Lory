@@ -6,8 +6,8 @@ const populateTable = () => {
         itemSnapshot.forEach((itemDoc) => {
             const itemData = itemDoc.data();
             const tableID = itemData.tableid;
-            const customerID = itemData.customerid;
-            const status = itemData.status;
+            const date = itemData.date.toDate();
+            const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });            const status = itemData.status;
             let completed = 0;
             let pending = 0;
 
@@ -48,7 +48,7 @@ const populateTable = () => {
 
                     // Generate table row
                     count++;
-                    generateRow(tableID, customerID, completed, pending, status, itemDoc.id, count);
+                    generateRow(tableID, timeString, completed, pending, status, itemDoc.id, count);
                 }
             }).catch((error) => {
                 console.error("Error checking if checklist collection exists: ", error);
@@ -60,21 +60,21 @@ const populateTable = () => {
 };
 
 // Function to generate table row
-const generateRow = (tableID, customerID, completed, pending, status, itemID, count) => {
+const generateRow = (tableID, timeString, completed, pending, status, itemID, count) => {
     const row = `
         <tr id="${count}">
             <td>${tableID}</td>
-            <td>${customerID}</td>
+            <td>${timeString}</td>
             <td>${completed}</td>
             <td>${pending}</td>
             <td>${status}</td>
-            <td><button class="btn btn-sm btn-success list-button" id="${itemID}" onclick="getChecklist('${itemID}', '${customerID}', ${count})">View</button></td>
+            <td><button class="btn btn-sm btn-success list-button" id="${itemID}" onclick="getChecklist('${itemID}', '${tableID}', ${count})">View</button></td>
         </tr>
     `;
     tableList.innerHTML += row;
 };
 // Function to handle getting checklist items
-function getChecklist(itemId, customerID, rowId){
+function getChecklist(itemId, tableID, rowId){
     const currentRow = document.getElementById(rowId);
     // Update counts in column number 3 and 4 of the current row
     let column3Value = currentRow.cells[2].textContent;
@@ -87,8 +87,9 @@ function getChecklist(itemId, customerID, rowId){
     const checklistItemsContainer = document.getElementById('checklist-items');
     checklistItemsContainer.innerHTML = `
         <div class="row mb-2">
-            <div class="col-6 list-item p-0"><b class="h6">Dishname</b></div>
-            <div class="col-6 list-item p-0"><b class="h6">Actions</b></div>
+            <div class="col-4 list-item p-0"><b class="h6">Quantity</b></div>
+            <div class="col-4 list-item p-0"><b class="h6">Dishname</b></div>
+            <div class="col-4 list-item p-0"><b class="h6">Actions</b></div>
         </div>
     `;
 
@@ -114,8 +115,10 @@ function getChecklist(itemId, customerID, rowId){
 
         // Display sorted checklist items
         checklistItems.forEach((checklistItem) => {
+            const qty = checklistItem.qty; // Get the quantity
             const dish = checklistItem.dish;
             const status = checklistItem.status;
+
             // Create checkbox element
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -126,17 +129,12 @@ function getChecklist(itemId, customerID, rowId){
             // Add event listener to checkbox for status update
             checkbox.addEventListener('change', () => {
                 const isChecked = checkbox.checked;
-                    if(isChecked){
-                        column3Value = parseInt(column3Value) + 1;
-                        currentRow.cells[2].textContent = column3Value;
-                        column4Value = parseInt(column4Value) - 1;
-                        currentRow.cells[3].textContent = column4Value;
-                    } else{
-                        column3Value = parseInt(column3Value) - 1;
-                        currentRow.cells[2].textContent = column3Value;
-                        column4Value = parseInt(column4Value) + 1;
-                        currentRow.cells[3].textContent = column4Value;
-                    }
+                if (isChecked) {
+                    // Perform actions when checkbox is checked
+                } else {
+                    // Perform actions when checkbox is unchecked
+                }
+
                 // Update the status of the checklist item in the database
                 db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemId).collection("checklist").doc(checklistItem.id).update({
                     status: isChecked ? 'completed' : 'incomplete'
@@ -150,11 +148,14 @@ function getChecklist(itemId, customerID, rowId){
                     // Update the status of the parent item based on all checklist items' status
                     const parentStatus = allChecked ? 'completed' : 'pending';
                     
-                    if (allChecked){
+                    // Update UI based on parent status
+                    if (allChecked) {
                         currentRow.cells[4].textContent = 'completed';
                     } else {
                         currentRow.cells[4].textContent = 'pending';
                     }
+
+                    // Update the status of the parent item in the database
                     return db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemId).update({
                         status: parentStatus
                     });
@@ -165,27 +166,26 @@ function getChecklist(itemId, customerID, rowId){
                 });
             });
 
-
-            // Create div to hold checkbox and dish name
+            // Create div to hold quantity, checkbox, and dish name
             const checklistItemDiv = document.createElement('div');
             checklistItemDiv.className = 'row mb-2';
             checklistItemDiv.innerHTML = `
-                <div class="col-6 list-item p-0">${dish}</div>
-                <div class="col-6 list-item p-0"></div>
+                <div class="col-4 list-item p-0">${qty}</div>
+                <div class="col-4 list-item p-0">${dish}</div>
+                <div class="col-4 list-item p-0"></div>
             `;
-            checklistItemDiv.lastElementChild.appendChild(checkbox);
+            checklistItemDiv.children[2].appendChild(checkbox); // Append checkbox to the third column
 
             // Append checklist item to container
             checklistItemsContainer.appendChild(checklistItemDiv);
         });
-
     }).catch((error) => {
         console.error("Error getting checklist items: ", error);
     });
 
     // Display customer ID
     const changeId = `
-        <h6><b>Customer ID - ${customerID}</b></h6>
+        <h6><b>Table Number - ${tableID}</b></h6>
     `;
     customerIdContainer.innerHTML = changeId;
 };

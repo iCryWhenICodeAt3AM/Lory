@@ -210,7 +210,7 @@ function placeOrder() {
     } else {
         // If no existing row is found, create a new row for the item
         const orderHTML = `
-            <div class="row mt-1 mb-1 row-items">
+            <div class="row mt-1 mb-1 row-items" id="${rowId}">
                 <div class="col-2 list-item p-0 mt-2 qty">${quantity}</div>
                 <div class="col-6 list-item p-0 mt-2 item">${itemName}</div>
                 <div class="col-2 list-item p-0 mt-2 total">${totalPrice}</div>
@@ -223,13 +223,7 @@ function placeOrder() {
 
     // Update the order total
     updateOrderTotal(totalPrice);
-
-    // Close the modal
-    const orderModal = document.getElementById('orderModal');
-    const modal = bootstrap.Modal.getInstance(orderModal);
-    modal.hide();
 }
-
 
 // Confirm Modal
 function openConfirmationModal(itemName, totalPrice, quantity, rowId) {
@@ -282,40 +276,43 @@ document.querySelector('#confirmationModal .btn-close').addEventListener('click'
     modal.style.display = 'none';
 });
 // Submit to database verification
-function submit() {
+async function submit() {
+    const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc();
     const details = [];
     const currentDate = new Date();
     const rows = document.querySelectorAll('.order-items .row-items');
-    const customerid = Math.floor(Math.random() * 200) + 1;
-    const tableid = Math.floor(Math.random() * 12) + 1;
+    const tableid = Math.floor(Math.random() * 12) + 1; // To be changed based on table accounts || cashier account
     const date = firebase.firestore.Timestamp.fromDate(currentDate);
     const status = "pending";
     const total = document.getElementById("order-total-list").innerHTML;
-    
-    rows.forEach(row => {
-        const qtyHTML = row.querySelector('.qty').innerHTML;
-        const itemHTML = row.querySelector('.item').innerHTML;
-        const totalHTML = row.querySelector('.total').innerHTML;
-        // Add collected HTML to the array
-        details.push({ qtyHTML, itemHTML, totalHTML });
-    });
 
-    // Save order details to Firestore
-    const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc();
-    const orderData = {
-        customerid,
-        tableid,
-        date,
-        status,
-        total
-    };
+    try {
+        // Get the highest customer id
+        let customerid = await getHighestCustomerId();
 
-    // Add details collection to the order document
-    orderRef.set(orderData).then(() => {
+        // Increment highestCustomerId
+        customerid++;
+
+        // Save order details to Firestore
+        const orderData = {
+            customerid,
+            tableid,
+            date,
+            status,
+            total
+        };
+
+        // Add details collection to the order document
+        await orderRef.set(orderData);
+
         const batch = db.batch();
         const detailsCollection = orderRef.collection("details");
-        details.forEach((detail, index) => {
-            const { qtyHTML, itemHTML, totalHTML } = detail;
+
+        // Add details to batch
+        rows.forEach((row, index) => {
+            const qtyHTML = row.querySelector('.qty').innerHTML;
+            const itemHTML = row.querySelector('.item').innerHTML;
+            const totalHTML = row.querySelector('.total').innerHTML;
             const detailData = {
                 qty: qtyHTML,
                 dish: itemHTML,
@@ -323,16 +320,40 @@ function submit() {
             };
             batch.set(detailsCollection.doc(`${index+1}`), detailData);
         });
-        return batch.commit();
-    }).then(() => {
+
+        // Commit batch
+        await batch.commit();
+
         console.log("Order and details saved successfully!");
         alert("Order and details saved successfully!");
-        location.reload();
-    }).catch((error) => {
+    } catch (error) {
         console.error("Error saving order and details: ", error);
         alert("Error saving order. Please call on a staff.");
-    });
+    }
 }
+
+// Function to get the highest customer id
+async function getHighestCustomerId() {
+    const queueRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue");
+
+    let highestCustomerId = 0;
+
+    try {
+        const querySnapshot = await queueRef.orderBy("customerid", "desc").limit(1).get();
+
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+                highestCustomerId = doc.data().customerid;
+            });
+        }
+    } catch (error) {
+        console.error("Error getting highest customerid:", error);
+        throw error;
+    }
+
+    return highestCustomerId;
+}
+
 
 // Function to remove all row-items from the place-order div
 function removeRowItems() {
@@ -366,7 +387,10 @@ function copyRowItems() {
     rowItems.forEach(rowItem => {
         // Create a copy of the row-item
         const copy = rowItem.cloneNode(true);
-        
+
+        // Remove the fourth column (actions column) from the copy
+        copy.removeChild(copy.lastElementChild);
+
         // Append the copy to the place-order div
         placeOrderDiv.appendChild(copy);
     });
