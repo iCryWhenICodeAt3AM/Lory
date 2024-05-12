@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="css/master.css">
 </head>
-<body>
+<body onload="checkOnload()">
 
 
 
@@ -195,7 +195,7 @@
                         </div>
                         <div class="col-12 mt-1">
                             <!-- <button class="btn btn-c btn-outline-success" onclick="submit()"> -->
-                            <button class="btn btn-c btn-outline-success" onclick="copyRowItems()" data-toggle="modal" data-target="#confirmOrder">
+                            <button class="btn btn-c btn-outline-success" onclick="copyRowItems('place-order', 'place-order-total')" data-toggle="modal" data-target="#confirmOrder">
                                 <img src="images/check.svg" alt="Check" height="100%" width="100%">
                             </button>
                         </div>
@@ -239,7 +239,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" onclick="submit()" class="btn btn-primary" data-dismiss="modal" data-toggle="modal" data-target="#finalModal" >Place Order</button>
+                        <button type="button" id="submitButton" onclick="submit();copyRowItems('final-order', 'final-order-total')" class="btn btn-primary" data-dismiss="modal" data-toggle="modal" data-target="#finalModal" >Place Order</button>
                     </div>
                     </div>
                 </div>
@@ -248,15 +248,34 @@
             <div class="modal fade" id="finalModal" aria-hidden="true" aria-labelledby="finalModalLabel" tabindex="-1">
                 <div class="modal-dialog modal-fullscreen">
                   <div class="modal-content">
-                    <div class="modal-header text-center">
-                      <h5 class="modal-title" id="exampleModalToggleLabel">Order is being prepared...</h5>
-                    </div>
-                    <div class="modal-body">
+                    <div class="modal-body finalModal">
                       <!-- Show a second modal and hide this one with the button below. -->
+                      <!--  -->
+                        <!-- Order Items -->
+                        <div class="final-order col-10 offset-2 pe-5 text-center">
+                            <!-- Headers -->
+                            <div class="row mb-2">
+                                <div class="col-2 list-item p-0"><b>Qty</b></div>
+                                <div class="col-6 list-item p-0"><b>Item</b></div>
+                                <div class="col-2 list-item p-0"><b>Total</b></div>
+                            </div>
+                            <!-- Contents -->
+                        </div>
+                        <div class="col-12 pt-3 text-center">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6><b>Order Total</b></h6>
+                                </div>
+                                <div class="col-12">
+                                    <h6 id="final-order-total">0</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <!--  -->
                     </div>
-                    <div class="modal-footer text-center">
-                        <button type="button" class="btn btn-secondary">Add extra food</button>
-                        <button type="button" onclick="" class="btn btn-primary">Bill-out</button>                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" onclick="hideModal()" data-dismiss="modal">Add extra food</button>
+                        <button type="button" class="btn btn-primary" onclick="billOut()">Bill-out</button>                    </div>
                   </div>
                 </div>
               </div>
@@ -270,6 +289,12 @@
     <script src="js/firestore.js"></script>
     <script src="js/ordering.js"></script>
     <script src="js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+        window.onbeforeunload = function() {
+            return "Dude, are you sure you want to leave? Think of the kittens!";
+        }
+    </script>
 
 
 

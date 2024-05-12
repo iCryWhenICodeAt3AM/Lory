@@ -92,11 +92,14 @@ const firebaseConfig = {
     const auth = getAuth();
     const firestore = getFirestore(app);
 
- // Function to get role based on email
+  // Function to get role based on email
   const getRoleByEmail = async (email) => {
     const q = query(collection(firestore, 'employees'), where("email", "==", email));
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
+      localStorage.setItem("userDocId", querySnapshot.docs[0].id);
+      localStorage.setItem("userRole", querySnapshot.docs[0].data().role);
+      localStorage.setItem("userName", querySnapshot.docs[0].data().name);
       return querySnapshot.docs[0].data().role;
     }
     return null; // Return null if no matching user found
