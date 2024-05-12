@@ -469,6 +469,16 @@ async function checkOnload() {
     console.log(docId);
     // Reference to the user's document in the "employees" collection
     const docRef = db.collection("employees").doc(docId);
+    const docSnapshot  = await docRef.get();
+    // onload set the orderId to the current occupant data
+    if (docSnapshot .exists){
+        const occupantOrderId = docSnapshot.data().occupantOrderId;
+        localStorage.setItem("orderId", occupantOrderId);
+        console.log(occupantOrderId);
+    } else {
+        console.log("No document exists!")
+    }
+
     let occupied, occupantDocId;
     try {
         // Get the user's document data
@@ -564,7 +574,6 @@ async function billOut(){
     // Update employee status
     const docId = localStorage.getItem("userDocId");
     const docRef = db.collection("employees").doc(docId);
-
         try {
             await docRef.update({
                 occupantOrderId: firebase.firestore.FieldValue.delete(),
