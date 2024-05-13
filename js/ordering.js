@@ -127,12 +127,38 @@ function filterItems(category) {
 
 
 document.getElementById('orderModal').addEventListener('show.bs.modal', function (event) {
-    // Extract item name and price from the triggering button's data attributes
+    // Extract item name from the triggering button's data attributes
     var button = event.relatedTarget;
     var itemName = button.dataset.itemName;
-    var itemPrice = parseFloat(button.dataset.itemPrice); // Parse price as a float
+
+    // Default values for itemPrice, qty, and rowid
+    var itemPrice = 0.00;
+    var qty = 1;
+    var rowid = null;
+    var total = 0;
+    // Check if itemPrice, qty, and rowid exist in the dataset properties
+    if (button.dataset.itemPrice) {
+        itemPrice = parseFloat(button.dataset.itemPrice); // Parse price as a float
+        console.log("itemPrice: ",itemPrice);
+    }
+
+    if (button.dataset.itemQty) {
+        qty = parseInt(button.dataset.itemQty); // Parse quantity as an integer
+        console.log("qty: ",qty);
+
+    }
+
+    if (button.dataset.itemRowid) {
+        rowid = button.dataset.itemRowid;
+        console.log("rowid: ",rowid);
+    }
+
+    if (button.dataset.itemTotal) {
+        total = parseFloat(button.dataset.itemTotal);
+        console.log("Total: ",total);
+    }
     
-    // Update modal content with item name and price
+    // Update modal content with item name, price, quantity, and total
     var modal = this;
     modal.querySelector('.modal-title').textContent = 'Order ' + itemName;
     modal.querySelector('.modal-body').innerHTML = `
@@ -142,13 +168,16 @@ document.getElementById('orderModal').addEventListener('show.bs.modal', function
                 <label for="quantity" class="form-label">Quantity</label>
                 <div class="input-group">
                     <button class="btn btn-outline-secondary" type="button" id="decrementBtn">-</button>
-                    <input type="number" class="form-control" id="quantity" min="1" value="1">
+                    <input type="number" class="form-control" id="quantity" min="1" value="${qty}">
                     <button class="btn btn-outline-secondary" type="button" id="incrementBtn">+</button>
                 </div>
             </div>
-            <p>Total Price: <span id="totalPrice">Php 0.00</span></p>
+            <p>Total Price: <span id="totalPrice">Php ${(total).toFixed(2)}</span></p>
         </form>`;
-
+    if (button.dataset.itemRowid) {
+        rowid = button.dataset.itemRowid;
+        document.getElementById("placeOrder").setAttribute("value", "true");
+    }
     // Function to calculate total price
     function calculateTotalPrice(quantity) {
         return (itemPrice * quantity).toFixed(2); // Calculate total price and round to 2 decimal places
@@ -178,70 +207,126 @@ document.getElementById('orderModal').addEventListener('show.bs.modal', function
         const currentValue = parseInt(quantityInput.value);
         totalPriceSpan.textContent = 'Php ' + calculateTotalPrice(currentValue);
     });
+    
 });
 
-function placeOrder() {
+function placeOrder(classId) {
     const quantity = parseInt(document.getElementById('quantity').value);
     const itemName = document.querySelector('.modal-title').textContent.split('Order ')[1];
     const itemPrice = parseFloat(document.querySelector('.modal-body p').textContent.split('Php ')[1]);
-
-    const totalPrice = (quantity * itemPrice).toFixed(0); // Calculate total price
+    const buttonItemName = document.getElementById(itemName);
+    const chgQtyBtn = document.getElementById("changeQuantityBtn");
+    const originalValue = chgQtyBtn.getAttribute("data-item-total");
+    let totalPrice = (quantity * itemPrice).toFixed(0); // Calculate total price
+    console.log("Orig: ",originalValue, " New: ",totalPrice, " Difference: ", totalPrice-originalValue);
     // Generate Row Id
-    const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
-
+    let matchedRowId = "";
     // Check if there is an existing row for the item
     let existingRow = null;
-    const rows = document.querySelectorAll('.order-items .row-items');
+    const rows = document.querySelectorAll(classId);
     rows.forEach(row => {
+        console.log("Row: ",row)
         const itemNameInRow = row.querySelector('.item').textContent;
         if (itemNameInRow === itemName) {
             existingRow = row;
+            matchedRowId = row.id;
         }
     });
-
-    if (existingRow) {
-        // If an existing row is found, update the quantity
-        const existingQuantity = parseInt(existingRow.querySelector('.qty').textContent);
-        const newQuantity = existingQuantity + quantity;
-        existingRow.querySelector('.qty').textContent = newQuantity;
-        const existingTotal = parseFloat(existingRow.querySelector('.total').textContent);
-        const newTotalPrice = existingTotal + parseFloat(totalPrice);
+    let placeOrderButton = document.getElementById("placeOrder").value;
+    if(placeOrderButton=="true"){
+        // qty
+        existingRow.querySelector('.qty').textContent = quantity;
+        // total price
+        const newTotalPrice = parseFloat(totalPrice);
         existingRow.querySelector('.total').textContent = newTotalPrice.toFixed(0);
-    } else {
-        // If no existing row is found, create a new row for the item
-        const orderHTML = `
-            <div class="row mt-1 mb-1 row-items" id="${rowId}">
-                <div class="col-2 list-item p-0 mt-2 qty">${quantity}</div>
-                <div class="col-6 list-item p-0 mt-2 item">${itemName}</div>
-                <div class="col-2 list-item p-0 mt-2 total">${totalPrice}</div>
-                <div class="col-2 list-item p-0"><button class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${itemName}', ${totalPrice}, ${quantity}, '${rowId}')">X</button></div>
-            </div>
-        `;
-        // Append the new row to the order items
-        document.querySelector('.order-items').innerHTML += orderHTML;
+        // onclick
+        buttonItemName.setAttribute('onclick', `openConfirmationModal('${itemName}', ${newTotalPrice}, ${quantity}, '${matchedRowId}')`);
+        // placeorder value
+        document.getElementById("placeOrder").value = "false";
+        chgQtyBtn.setAttribute("data-item-name", itemName);
+        chgQtyBtn.setAttribute("data-item-price", totalPrice/quantity);
+        chgQtyBtn.setAttribute("data-item-qty", quantity);
+        chgQtyBtn.setAttribute("data-item-total", newTotalPrice.toFixed(2));
+        chgQtyBtn.setAttribute("data-item-rowid", matchedRowId);
+        totalPrice = totalPrice - originalValue;
+        // Remove row if necessary
+        if (quantity === 0 && matchedRowId) {
+            document.getElementById(matchedRowId).remove();
+        }
+    } else{
+        if (existingRow) {
+            const chgQtyBtn = document.getElementById("changeQuantityBtn");
+            // If an existing row is found, update the quantity
+            const existingQuantity = parseInt(existingRow.querySelector('.qty').textContent);
+            const newQuantity = existingQuantity + quantity;
+            existingRow.querySelector('.qty').textContent = newQuantity;
+            const existingTotal = parseFloat(existingRow.querySelector('.total').textContent);
+            const newTotalPrice = existingTotal + parseFloat(totalPrice);
+            existingRow.querySelector('.total').textContent = newTotalPrice.toFixed(0);
+            chgQtyBtn.setAttribute("data-item-qty", newQuantity);
+            chgQtyBtn.setAttribute("data-item-total", newTotalPrice.toFixed(2));
+            buttonItemName.setAttribute('onclick', `openConfirmationModal('${itemName}', ${newTotalPrice}, ${newQuantity}, '${matchedRowId}')`);
+        } else {
+            const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
+            // If no existing row is found, create a new row for the item
+            const orderHTML = `
+                <div class="row mt-1 mb-1 row-items" id="${rowId}">
+                    <div class="col-2 list-item p-0 mt-2 qty">${quantity}</div>
+                    <div class="col-6 list-item p-0 mt-2 item">${itemName}</div>
+                    <div class="col-2 list-item p-0 mt-2 total">${totalPrice}</div>
+                    <div class="col-2 list-item p-0"><button id="${itemName}" class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${itemName}', ${totalPrice}, ${quantity}, '${rowId}')">X</button></div>
+                </div>
+            `;
+            // Append the new row to the order items
+            document.querySelector('.order-items').innerHTML += orderHTML;
+                // Update the order total
+        }
     }
-
-    // Update the order total
     updateOrderTotal(totalPrice);
 }
 
 // Confirm Modal
 function openConfirmationModal(itemName, totalPrice, quantity, rowId) {
     // Display the item name and total price in the confirmation modal
-    document.querySelector('#confirmationModal .modal-body').innerHTML = `Item: ${itemName}<br>Quantity: ${quantity}<br>Total Price: Php ${totalPrice.toFixed(2)}`;
-
+    document.querySelector('#confirmationModal .modal-body').innerHTML = `<p><b>Please select an action.</b></p>Item: ${itemName}<br>Quantity: ${quantity}<br>Total Price: Php ${totalPrice.toFixed(2)}`;
+    const chgQtyBtn = document.getElementById("changeQuantityBtn");
+    chgQtyBtn.setAttribute("data-item-name", itemName);
+    chgQtyBtn.setAttribute("data-item-price", totalPrice/quantity);
+    chgQtyBtn.setAttribute("data-item-qty", quantity);
+    chgQtyBtn.setAttribute("data-item-total", totalPrice.toFixed(2));
+    chgQtyBtn.setAttribute("data-item-rowid", rowId);
+    console.log(rowId, totalPrice);
     // Show the confirmation modal
-    document.getElementById('confirmationModal').classList.add('show');
-    document.getElementById('confirmationModal').style.display = 'block';
+    $('#confirmationModal').modal('show');
 
-    document.getElementById('confirmationSuccessBtn').addEventListener('click', function(event) {
-        // Find the row element by its ID
-        const row = document.getElementById(rowId).remove();
-        updateOrderTotal(-totalPrice);
-        // Hide the modal
-        document.getElementById('confirmationModal').classList.remove('show');
-        document.getElementById('confirmationModal').style.display = 'none';
-    });
+    chgQtyBtn.setAttribute("onclick", "qtyChange(\'"+rowId+"\')");
+
+    // Event listener for deleting the item
+    document.getElementById('deleteItemBtn').setAttribute("onclick", "deleteRow(\'"+rowId+"\',"+totalPrice+")");
+
+    // document.getElementById('deleteItemBtn').addEventListener('click', function(event) {
+    //     console.log('Deleting item with ID:', rowId);
+    //     // Call a function to handle deleting the item
+    //     if(document.getElementById(rowId)){
+    //         document.getElementById(rowId).remove();
+    //         updateOrderTotal(-totalPrice);
+    //     }
+    //     // deleteItemAction(rowId, totalPrice);
+    //     $('#confirmationModal').modal('hide');
+
+    // });
+
+}
+
+function deleteRow(rowId, totalPrice){
+    document.getElementById(rowId).remove();
+    updateOrderTotal(-totalPrice);
+    $('#confirmationModal').modal('hide');
+}
+
+function qtyChange(rowId){
+    console.log('Changing quantity for item with ID:', rowId);
+    $('#confirmationModal').modal('hide');
 }
 
 // Function to update the order total
@@ -308,7 +393,11 @@ async function submit() {
 
         const batch = db.batch();
         const detailsCollection = orderRef.collection("details");
-
+        // 
+        const customerId = await orderRef.get();
+        localStorage.setItem("customerId", customerId.data().customerid);
+        const orderNumber = localStorage.getItem("customerId");
+        document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
         // Add details to batch
         rows.forEach((row, index) => {
             const qtyHTML = row.querySelector('.qty').innerHTML;
@@ -330,8 +419,10 @@ async function submit() {
         // Get the document ID of the newly created order
         const orderId = orderRef.id;
         localStorage.setItem("orderId", orderId);
+        localStorage.setItem("customerId", customerid);
         console.log("Document ID of the newly created order:", orderId);
-
+        console.log("Document ID of the newly created order:", customerid);
+        
         // Update employee status
         const docRef = db.collection("employees").doc(docId);
 
@@ -354,29 +445,46 @@ async function followUpOrder() {
     try {
         const currentDate = new Date();
         const total = document.getElementById("order-total-list").innerHTML;
-        const rows = document.querySelectorAll('.order-items .row-items');
         const orderId = localStorage.getItem("orderId");
         const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(orderId);
 
         // Step 1: Update existing fields in the document
         const updateData = {
             date: currentDate,
-            tota: total,
+            total: total,
             status: "pending"
         };
-
-        orderRef.update(updateData)
-        .then(() => {
-            console.log('Document updated successfully');
-        })
-        .catch((error) => {
-            console.error('Error updating document:', error);
-        });
+        await orderRef.update(updateData);
 
         const batch = db.batch();
         const detailsCollection = orderRef.collection("details");
 
-        // Add details to batch
+        // Step 2: Update existing details documents and remove unmatched documents
+        const existingDocsSnapshot = await detailsCollection.get();
+        existingDocsSnapshot.forEach(existingDoc => {
+            const existingData = existingDoc.data();
+            const existingQty = existingData.qty;
+            const existingTotal = existingData.total;
+
+            let foundMatch = false;
+            const rows = document.querySelectorAll('.order-items .row-items');
+            rows.forEach(row => {
+                const qtyHTML = row.querySelector('.qty').innerHTML;
+                const totalHTML = row.querySelector('.total').innerHTML;
+                if (qtyHTML === existingQty && totalHTML === existingTotal) {
+                    foundMatch = true;
+                    return;
+                }
+            });
+
+            if (!foundMatch) {
+                // Remove unmatched document
+                batch.delete(existingDoc.ref);
+            }
+        });
+
+        // Step 3: Add new items from the current rows
+        const rows = document.querySelectorAll('.order-items .row-items');
         rows.forEach((row, index) => {
             const qtyHTML = row.querySelector('.qty').innerHTML;
             const itemHTML = row.querySelector('.item').innerHTML;
@@ -386,14 +494,15 @@ async function followUpOrder() {
                 dish: itemHTML,
                 total: totalHTML
             };
-            batch.set(detailsCollection.doc(`${index+1}`), detailData);
+            batch.set(detailsCollection.doc(`${index+1}`), detailData, { merge: true });
         });
 
-        // Commit batch
+        // Step 4: Commit batch
         await batch.commit();
+        console.log("Details collection updated successfully");
 
     } catch (error) {
-        console.error("Error adding new item:", error);
+        console.error("Error updating details collection:", error);
     }
 }
 
@@ -467,6 +576,7 @@ async function checkOnload() {
     const submitButton = document.getElementById("submitButton");
     const docId = localStorage.getItem("userDocId");
     console.log(docId);
+    let customerId = "";
     // Reference to the user's document in the "employees" collection
     const docRef = db.collection("employees").doc(docId);
     const docSnapshot  = await docRef.get();
@@ -498,7 +608,11 @@ async function checkOnload() {
                 if (orderSnapshot.exists) {
                     // Display order details
                     await displayOrderItems(orderRef); // Implement this function to display order items
-                    
+                    customerId = orderSnapshot.data().customerid;
+                    localStorage.setItem("customerId", customerId);
+                    const orderNumber = localStorage.getItem("customerId");
+                    document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
+                    console.log(finalModalTitle);
                     // Open the final modal
                     openFinalModal();
                     submitButton.setAttribute("onclick", "followUpOrder();copyRowItems('final-order', 'final-order-total')")
@@ -541,7 +655,7 @@ async function displayOrderItems(orderRef) {
                 <div class="col-6 list-item p-0 mt-2 item">${dish}</div>
                 <div class="col-2 list-item p-0 mt-2 total">${total}</div>
                 <div class="col-2 list-item p-0">
-                    <button class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${dish}', ${total}, ${qty}, '${rowId}')" disabled>X</button>
+                    <button id="${dish}"class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${dish}', ${total}, ${qty}, '${rowId}')">X</button>
                 </div>
             </div>
         `;
@@ -567,20 +681,45 @@ function hideModal(){
     $('#finalModal').modal('hide');
 }
 
-async function billOut(){
-    // update the status into bill-out
-    // notify on the cashier side
-    // remove the occupant and occupantOrderId
-    // Update employee status
-    const docId = localStorage.getItem("userDocId");
-    const docRef = db.collection("employees").doc(docId);
-        try {
-            await docRef.update({
-                occupantOrderId: firebase.firestore.FieldValue.delete(),
-                occupied: firebase.firestore.FieldValue.delete() 
-            });
-            alert("Bill-out notified. Please wait for the waiter.");
-        } catch (error) {
-            console.error("Error updating fields:", error);
+async function billOut() {
+    try {
+        const orderId = localStorage.getItem("orderId");
+        const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(orderId);
+
+        // Get the order status
+        const orderDoc = await orderRef.get();
+        if (orderDoc.exists) {
+            const orderData = orderDoc.data();
+            const orderStatus = orderData.status;
+
+            // Check if the order status is "served"
+            if (orderStatus === "served") {
+                // Update the order status to "bill-out"
+                await orderRef.update({ status: "bill-out" });
+
+                // Update employee status and remove occupant details
+                const docId = localStorage.getItem("userDocId");
+                const employeeRef = db.collection("employees").doc(docId);
+                await employeeRef.update({
+                    occupantOrderId: firebase.firestore.FieldValue.delete(),
+                    occupied: firebase.firestore.FieldValue.delete()
+                });
+
+                // Notify the cashier
+                alert("Bill-out notified. Please wait for the waiter.");
+
+                // Clear local storage
+                localStorage.setItem("orderId", "");
+                localStorage.setItem("customerId", "");
+                location.reload();
+            } else {
+                // If the order status is not "served", alert the user
+                alert("Order was not fully served. Cannot proceed with bill-out.");
+            }
+        } else {
+            console.error("Order document not found.");
         }
+    } catch (error) {
+        console.error("Error during bill-out process:", error);
+    }
 }
