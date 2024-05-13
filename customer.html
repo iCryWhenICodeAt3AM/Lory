@@ -80,7 +80,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="placeOrder()" data-bs-toggle="modal" data-bs-target="#orderModal">Order</button>
+                    <button type="button" id="placeOrder" class="btn btn-primary" onclick="placeOrder('.order-items .row-items')" value="false"
+                    data-bs-toggle="modal" data-bs-target="#orderModal">Order</button>
                 </div>
             </div>
         </div>
@@ -89,21 +90,26 @@
     <!-- Confirmation Modal -->
     <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="confirmationModalLabel">Remove Item</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Options</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Please select an action.</p>
+                </div>
+                <div class="modal-footer">
+                    <!-- Add button to change quantity -->
+                    <button type="button" class="btn btn-warning" id="changeQuantityBtn" data-bs-toggle="modal" data-bs-target="#orderModal">Change Quantity</button>
+                    <!-- Add button to delete item -->
+                    <button type="button" class="btn btn-danger" id="deleteItemBtn">Delete Item</button>
+                    <!-- Add button to close modal -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
-            <div class="modal-body">
-              <p>Are you sure you want to remove this item?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                <button id="confirmationSuccessBtn" type="button" class="btn btn-primary">Yes</button>
-            </div>
-          </div>
         </div>
-      </div>
+    </div>
+
 
     <!-- Side Navigation -->
     <div class="container-fluid">
@@ -175,10 +181,9 @@
                         <div class="order-items col-10 offset-1 p-3">
                             <!-- Headers -->
                             <div class="row mb-2">
-                                <div class="col-2 list-item p-0"><b>Qty</b></div>
+                                <div class="col-3 list-item p-0"><b>Qty</b></div>
                                 <div class="col-6 list-item p-0"><b>Item</b></div>
-                                <div class="col-2 list-item p-0"><b>Total</b></div>
-                                <div class="col-2 list-item p-0"><b>Act</b></div>
+                                <div class="col-3 list-item p-0"><b>Total</b></div>
                             </div>
                             <!-- Contents -->
                             
@@ -219,9 +224,9 @@
                         <div class="place-order col-10 offset-2">
                             <!-- Headers -->
                             <div class="row mb-2">
-                                <div class="col-2 list-item p-0"><b>Qty</b></div>
+                                <div class="col-3 list-item p-0"><b>Qty</b></div>
                                 <div class="col-6 list-item p-0"><b>Item</b></div>
-                                <div class="col-2 list-item p-0"><b>Total</b></div>
+                                <div class="col-3 list-item p-0"><b>Total</b></div>
                             </div>
                             <!-- Contents -->
                         </div>
@@ -249,15 +254,18 @@
                 <div class="modal-dialog modal-fullscreen">
                   <div class="modal-content">
                     <div class="modal-body finalModal">
+                        <div class="col-4 offset-4 text-center justify-content-center mb-5 border border-2">
+                            <h5 class="modal-title" id="finalModalTitle"></h5>
+                        </div>
                       <!-- Show a second modal and hide this one with the button below. -->
                       <!--  -->
                         <!-- Order Items -->
                         <div class="final-order col-10 offset-2 pe-5 text-center">
                             <!-- Headers -->
                             <div class="row mb-2">
-                                <div class="col-2 list-item p-0"><b>Qty</b></div>
+                                <div class="col-3 list-item p-0"><b>Qty</b></div>
                                 <div class="col-6 list-item p-0"><b>Item</b></div>
-                                <div class="col-2 list-item p-0"><b>Total</b></div>
+                                <div class="col-3 list-item p-0"><b>Total</b></div>
                             </div>
                             <!-- Contents -->
                         </div>
