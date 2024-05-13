@@ -56,8 +56,8 @@ function getSales(period, value) {
                 const date = itemData.date.toDate();
                 sortedSales.push({
                     docId: docId,
-                    customerId: itemData.customerId,
-                    tableId: itemData.tableId,
+                    customerId: itemData.customerid,
+                    tableId: itemData.tableid,
                     total: itemData.total,
                     date: date
                 });
@@ -91,10 +91,10 @@ function appendSale(docId, customerId, tableId, total, date, time){
     document.querySelector(`#sales-items`).innerHTML += `
         <tr>
             <td>${date}</td>
+            <td>${time}</td>
             <td>${customerId}</td>
             <td>${tableId}</td>
             <td>${total}</td>
-            <td>${time}</td>
             <td><button class="btn btn-sm btn-success list-button" id="${docId}" onclick="getDetails('${docId}', 'sales')">Confirm</button></td>
         </tr>
     `;

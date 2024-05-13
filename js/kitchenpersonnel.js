@@ -1,4 +1,5 @@
-const tableList = document.getElementById("list");
+const pendingList = document.getElementById("pending-list");
+const completedList = document.getElementById("completed-list");
 
 async function populateTable() {
     let count = 0;
@@ -15,81 +16,70 @@ async function populateTable() {
             try {
                 const checklistSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").get();
 
-                if (checklistSnapshot.empty) {
-                    // If "checklist" collection doesn't exist, create items based on "details" collection
-                    const detailsSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").get();
-                    for (const detailDoc of detailsSnapshot.docs) {
-                        const detailData = detailDoc.data();
-                        const dish = detailData.dish;
-                        const qty = detailData.qty;
+                // Compare items in checklist with items in details
+                const detailsSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").get();
+                detailsSnapshot.forEach(async (detailDoc) => {
+                    const detailData = detailDoc.data();
+                    const dish = detailData.dish;
+                    const qty = detailData.qty;
 
+                    const existingChecklistItem = checklistSnapshot.docs.find(doc => doc.data().dish === dish);
+
+                    if (!existingChecklistItem) {
+                        // Add new item to checklist
                         await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").add({
                             qty: qty,
                             dish: dish,
                             status: "incomplete"
                         });
+                        pending++;
                     }
-                } else {
-                    // Compare items in checklist with items in details
-                    const detailsSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").get();
-                    detailsSnapshot.forEach(async (detailDoc) => {
-                        const detailData = detailDoc.data();
-                        const dish = detailData.dish;
-                        const qty = detailData.qty;
+                });
 
-                        const existingChecklistItem = checklistSnapshot.docs.find(doc => doc.data().dish === dish);
+                // Update existing items in checklist
+                for (const checklistDoc of checklistSnapshot.docs) {
+                    const checklistData = checklistDoc.data();
+                    const dish = checklistData.dish;
+                    const qty = checklistData.qty;
+                    const status = checklistData.status;
 
-                        if (!existingChecklistItem) {
-                            // Add new item to checklist
-                            await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").add({
-                                qty: qty,
-                                dish: dish,
-                                status: "incomplete"
-                            });
-                            pending++;
+                    const detailSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").where("dish", "==", dish).get();
+
+                    if (detailSnapshot.empty) {
+                        // Remove item from checklist if it doesn't exist in details
+                        await checklistDoc.ref.delete();
+                    } else {
+                        const detailData = detailSnapshot.docs[0].data();
+                        const detailQty = detailData.qty;
+
+                        if (qty !== detailQty) {
+                            // Update quantity in checklist to match the one from details
+                            await checklistDoc.ref.update({ qty: detailQty });
                         }
-                    });
 
-                    // Update existing items in checklist
-                    for (const checklistDoc of checklistSnapshot.docs) {
-                        const checklistData = checklistDoc.data();
-                        const dish = checklistData.dish;
-                        const qty = checklistData.qty;
-                        const status = checklistData.status;
-
-                        const detailSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").where("dish", "==", dish).get();
-
-                        if (detailSnapshot.empty) {
-                            // Remove item from checklist if it doesn't exist in details
-                            await checklistDoc.ref.delete();
-                        } else {
-                            const detailData = detailSnapshot.docs[0].data();
-                            const detailQty = detailData.qty;
-
-                            if (qty !== detailQty) {
-                                // Update quantity in checklist to match the one from details
-                                await checklistDoc.ref.update({ qty: detailQty });
-                            }
-
-                            if (qty == detailQty) {
-                                // Keep status as is
-                                if (status === "completed") {
-                                    completed++;
-                                } else {
-                                    pending++;
-                                }
+                        if (qty == detailQty) {
+                            // Keep status as is
+                            if (status === "completed") {
+                                completed++;
                             } else {
-                                // Set status to pending if quantity in details is greater
                                 pending++;
-                                await checklistDoc.ref.update({ status: "pending" });
                             }
+                        } else {
+                            // Set status to pending if quantity in details is greater or less than
+                            pending++;
+                            await checklistDoc.ref.update({ status: "pending" });
                         }
                     }
                 }
 
-                // Generate table row
-                count++;
-                generateRow(tableID, timeString, completed, pending, status, itemDoc.id, count);
+                // Generate table row based on status
+                if (status === "completed" || status === "served") {
+                    count++;
+                    generateRow(tableID, timeString, completed, pending, status, itemDoc.id, count, completedList);
+                } else if(status === "pending"){
+                    count++;
+                    generateRow(tableID, timeString, completed, pending, status, itemDoc.id, count, pendingList);
+                }
             } catch (error) {
                 console.error("Error populating table: ", error);
             }
@@ -99,9 +89,8 @@ async function populateTable() {
     });
 }
 
-
 // Function to generate table row
-const generateRow = (tableID, timeString, completed, pending, status, itemID, count) => {
+const generateRow = (tableID, timeString, completed, pending, status, itemID, count, targetList) => {
     const row = `
         <tr id="${count}">
             <td>${tableID}</td>
@@ -112,7 +101,7 @@ const generateRow = (tableID, timeString, completed, pending, status, itemID, co
             <td><button class="btn btn-sm btn-success list-button" id="${itemID}" onclick="getChecklist('${itemID}', '${tableID}', ${count})">View</button></td>
         </tr>
     `;
-    tableList.innerHTML += row;
+    targetList.innerHTML += row;
 };
 
 // Function to handle getting checklist items
@@ -236,6 +225,34 @@ function getChecklist(itemId, tableID, rowId){
     customerIdContainer.innerHTML = changeId;
 };
 
+async function servedStatusUpdate() {
+    try {
+        const orderId = localStorage.getItem("orderId");
+        const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(orderId);
+
+        // Get the order status
+        const orderDoc = await orderRef.get();
+        if (orderDoc.exists) {
+            const orderData = orderDoc.data();
+            const orderStatus = orderData.status;
+
+            // Check if the order status is "completed"
+            if (orderStatus === "completed") {
+                // Update the order status to "served"
+                await orderRef.update({ status: "served" });
+                console.log("Order status updated to 'served'.");
+                location.reload();
+            } else {
+                // If the order status is not "completed", alert the user
+                alert("Order is not yet complete. Cannot update to 'served'.");
+            }
+        } else {
+            console.error("Order document not found.");
+        }
+    } catch (error) {
+        console.error("Error updating order status:", error);
+    }
+}
 
 
 populateTable();

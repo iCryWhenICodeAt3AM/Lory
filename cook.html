@@ -119,26 +119,57 @@
                 <!-- Table - START -->
                 <div class="row">
                     <div class="col-12 text-center table-responsive" style="max-height: 600px;">
-                        <table class="table items">
-                            <thead>
-                                <!-- Format if Verification -->
-                                <tr>
-                                    <th>Table Number</th>
-                                    <th>Time</th>
-                                    <th>Completed</th>
-                                    <th>Pending</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="list">
-                                <!-- List Generation Here -->
-                            </tbody>
-                        </table>
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="pending-tab" data-toggle="tab" href="#pending" role="tab" aria-controls="pending" aria-selected="true">Pending</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="completed-tab" data-toggle="tab" href="#completed" role="tab" aria-controls="completed" aria-selected="false">Completed & Served</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Pending Orders -->
+                            <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                                <table class="table items">
+                                    <thead>
+                                        <tr>
+                                            <th>Table Number</th>
+                                            <th>Time</th>
+                                            <th>Completed</th>
+                                            <th>Pending</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pending-list">
+                                        <!-- Pending Orders List Generation Here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Completed & Served Orders -->
+                            <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                                <table class="table items">
+                                    <thead>
+                                        <tr>
+                                            <th>Table Number</th>
+                                            <th>Time</th>
+                                            <th>Completed</th>
+                                            <th>Pending</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="completed-list">
+                                        <!-- Completed & Served Orders List Generation Here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- Table - END -->
             </div>
+
             <!-- Order List - START -->
             <div class="orderlist-container col-3 text-center">
                 <div class="order-list">
@@ -164,7 +195,7 @@
                         </div>
                         <div class="col-12">
                             <!-- <button class="btn btn-c btn-outline-success" onclick="submit()"> -->
-                            <button class="btn btn-c btn-outline-success" onclick="">
+                            <button class="btn btn-c btn-outline-success" onclick="servedStatusUpdate()">
                                 <img src="images/check.svg" alt="Check" height="100%" width="100%">
                             </button>
                         </div>
