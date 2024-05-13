@@ -1,63 +1,104 @@
 const tableList = document.getElementById("list");
 
-const populateTable = () => {
+async function populateTable() {
     let count = 0;
-    db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").orderBy("date", "desc").get().then((itemSnapshot) => {
-        itemSnapshot.forEach((itemDoc) => {
+    await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").orderBy("date", "desc").get().then(async (itemSnapshot) => {
+        for (const itemDoc of itemSnapshot.docs) {
             const itemData = itemDoc.data();
             const tableID = itemData.tableid;
             const date = itemData.date.toDate();
-            const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });            const status = itemData.status;
+            const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            const status = itemData.status;
             let completed = 0;
             let pending = 0;
 
-            // Check if "checklist" collection exists
-            db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").get().then((checklistSnapshot) => {
-                // If "checklist" collection doesn't exist, create items based on "details" collection
-                if (checklistSnapshot.empty) {
-                    db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").get().then((detailsSnapshot) => {
-                        detailsSnapshot.forEach((detailDoc) => {
-                            const detailData = detailDoc.data();
-                            const dish = detailData.dish;
-                            const qty = detailData.qty;
+            try {
+                const checklistSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").get();
 
-                            // Create item in "checklist" collection for each qty
-                            for (let i = 0; i < qty; i++) {
-                                db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").add({
-                                    dish: dish,
-                                    status: "incomplete"
-                                }).then((docRef) => {
-                                    console.log("Item added to checklist with ID: ", docRef.id);
-                                }).catch((error) => {
-                                    console.error("Error adding item to checklist: ", error);
-                                });
-                            }
+                if (checklistSnapshot.empty) {
+                    // If "checklist" collection doesn't exist, create items based on "details" collection
+                    const detailsSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").get();
+                    for (const detailDoc of detailsSnapshot.docs) {
+                        const detailData = detailDoc.data();
+                        const dish = detailData.dish;
+                        const qty = detailData.qty;
+
+                        await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").add({
+                            qty: qty,
+                            dish: dish,
+                            status: "incomplete"
                         });
-                    }).catch((error) => {
-                        console.error("Error getting documents from details collection: ", error);
-                    });
+                    }
                 } else {
-                    checklistSnapshot.forEach((checklistDoc) => {
-                        const checklistData = checklistDoc.data();
-                        if (checklistData.status === "completed") {
-                            completed++;
-                        } else {
+                    // Compare items in checklist with items in details
+                    const detailsSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").get();
+                    detailsSnapshot.forEach(async (detailDoc) => {
+                        const detailData = detailDoc.data();
+                        const dish = detailData.dish;
+                        const qty = detailData.qty;
+
+                        const existingChecklistItem = checklistSnapshot.docs.find(doc => doc.data().dish === dish);
+
+                        if (!existingChecklistItem) {
+                            // Add new item to checklist
+                            await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").add({
+                                qty: qty,
+                                dish: dish,
+                                status: "incomplete"
+                            });
                             pending++;
                         }
                     });
 
-                    // Generate table row
-                    count++;
-                    generateRow(tableID, timeString, completed, pending, status, itemDoc.id, count);
+                    // Update existing items in checklist
+                    for (const checklistDoc of checklistSnapshot.docs) {
+                        const checklistData = checklistDoc.data();
+                        const dish = checklistData.dish;
+                        const qty = checklistData.qty;
+                        const status = checklistData.status;
+
+                        const detailSnapshot = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("details").where("dish", "==", dish).get();
+
+                        if (detailSnapshot.empty) {
+                            // Remove item from checklist if it doesn't exist in details
+                            await checklistDoc.ref.delete();
+                        } else {
+                            const detailData = detailSnapshot.docs[0].data();
+                            const detailQty = detailData.qty;
+
+                            if (qty !== detailQty) {
+                                // Update quantity in checklist to match the one from details
+                                await checklistDoc.ref.update({ qty: detailQty });
+                            }
+
+                            if (qty == detailQty) {
+                                // Keep status as is
+                                if (status === "completed") {
+                                    completed++;
+                                } else {
+                                    pending++;
+                                }
+                            } else {
+                                // Set status to pending if quantity in details is greater
+                                pending++;
+                                await checklistDoc.ref.update({ status: "pending" });
+                            }
+                        }
+                    }
                 }
-            }).catch((error) => {
-                console.error("Error checking if checklist collection exists: ", error);
-            });
-        });
+
+                // Generate table row
+                count++;
+                generateRow(tableID, timeString, completed, pending, status, itemDoc.id, count);
+            } catch (error) {
+                console.error("Error populating table: ", error);
+            }
+        }
     }).catch((error) => {
         console.log("Error getting documents: ", error);
     });
-};
+}
+
 
 // Function to generate table row
 const generateRow = (tableID, timeString, completed, pending, status, itemID, count) => {
@@ -73,6 +114,7 @@ const generateRow = (tableID, timeString, completed, pending, status, itemID, co
     `;
     tableList.innerHTML += row;
 };
+
 // Function to handle getting checklist items
 function getChecklist(itemId, tableID, rowId){
     const currentRow = document.getElementById(rowId);
@@ -131,8 +173,12 @@ function getChecklist(itemId, tableID, rowId){
                 const isChecked = checkbox.checked;
                 if (isChecked) {
                     // Perform actions when checkbox is checked
+                    currentRow.cells[2].textContent = parseInt(currentRow.cells[2].textContent)+1;
+                    currentRow.cells[3].textContent = parseInt(currentRow.cells[3].textContent)-1;
                 } else {
                     // Perform actions when checkbox is unchecked
+                    currentRow.cells[2].textContent = parseInt(currentRow.cells[2].textContent)-1;
+                    currentRow.cells[3].textContent = parseInt(currentRow.cells[3].textContent)+1;
                 }
 
                 // Update the status of the checklist item in the database

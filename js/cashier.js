@@ -46,10 +46,9 @@ function resetDetailsList(){
                 <div class="details-items col-10 offset-1 p-3">
                     <!-- Headers -->
                     <div class="row mb-2">
-                        <div class="col-2 list-item p-0"><b>Qty</b></div>
+                        <div class="col-3 list-item p-0"><b>Qty</b></div>
                         <div class="col-6 list-item p-0"><b>Item</b></div>
-                        <div class="col-2 list-item p-0"><b>Total</b></div>
-                        <div class="col-2 list-item p-0"><b>Act</b></div>
+                        <div class="col-3 list-item p-0"><b>Total</b></div>
                     </div>
                     <!-- Contents -->
                     
@@ -223,19 +222,17 @@ function getDetails(docId, operation){
         labelId = docId;
         document.querySelector(".salesdetails-items").innerHTML = `
             <div class="row mb-2">
-                <div class="col-2 list-item p-0"><b>Qty</b></div>
+                <div class="col-3 list-item p-0"><b>Qty</b></div>
                 <div class="col-6 list-item p-0"><b>Item</b></div>
-                <div class="col-2 list-item p-0"><b>Total</b></div>
-                <div class="col-2 list-item p-0"><b>Act</b></div>
+                <div class="col-3 list-item p-0"><b>Total</b></div>
             </div>
         `;
     } else {
         document.querySelector(".details-items").innerHTML = `
             <div class="row mb-2">
-                <div class="col-2 list-item p-0"><b>Qty</b></div>
+                <div class="col-3 list-item p-0"><b>Qty</b></div>
                 <div class="col-6 list-item p-0"><b>Item</b></div>
-                <div class="col-2 list-item p-0"><b>Total</b></div>
-                <div class="col-2 list-item p-0"><b>Act</b></div>
+                <div class="col-3 list-item p-0"><b>Total</b></div>
             </div>
         `;
         if(!verifyButton){
@@ -291,10 +288,9 @@ function getDetails(docId, operation){
                     const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
                     document.querySelector(".salesdetails-items").innerHTML += `
                     <div class="row mt-1 mb-1" id="${rowId}">
-                        <div class="col-2 list-item p-0 mt-2"><b>${detailData.qty}</b></div>
-                        <div class="col-6 list-item p-0 mt-2"><b>${detailData.dish}</b></div>
-                        <div class="col-2 list-item p-0 mt-2"><b>${detailData.total}</b></div>
-                        <div class="col-2 list-item p-0"><div class="col-2 list-item p-0"><button class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${detailData.dish}', ${detailData.total}, ${detailData.qty}, '${rowId}')">X</button></div></div>
+                        <div class="col-3 list-item p-0 mt-2 qty">${detailData.qty}</div>
+                        <div class="col-6 list-item p-0 mt-2 item">${detailData.dish}</div>
+                        <div class="col-3 list-item p-0 mt-2 total">${detailData.total}</div>
                     </div>
                 `;
                 total += parseFloat(detailData.total);
@@ -325,12 +321,12 @@ function getDetails(docId, operation){
                     // Append details to the itemHTML
                     const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
                     console.log(detailDoc.id);
+                    
                     document.querySelector(".details-items").innerHTML += `
-                        <div class="row mt-1 mb-1" id="${rowId}">
-                            <div class="col-2 list-item p-0 mt-2"><b>${detailData.qty}</b></div>
-                            <div class="col-6 list-item p-0 mt-2"><b>${detailData.dish}</b></div>
-                            <div class="col-2 list-item p-0 mt-2"><b>${detailData.total}</b></div>
-                            <div class="col-2 list-item p-0"><div class="col-2 list-item p-0"><button class="btn-x btn btn-sm btn-outline-danger" onclick="openConfirmationModal('${detailData.dish}', ${detailData.total}, ${detailData.qty}, '${rowId}')">X</button></div></div>
+                        <div class="row mt-1 mb-1 row-items" id="${rowId}">
+                            <div class="col-3 list-item p-0 mt-2 qty">${detailData.qty}</div>
+                            <div class="col-6 list-item p-0 mt-2 item">${detailData.dish}</div>
+                            <div class="col-3 list-item p-0 mt-2 total">${detailData.total}</div>
                         </div>
                     `;
                     total += parseFloat(detailData.total);

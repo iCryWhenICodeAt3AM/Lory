@@ -65,15 +65,15 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                <h5 class="modal-title" id="orderModalLabel">Order Quantity</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="orderModalLabel">Order Quantity</h5>
                 </div>
                 <div class="modal-body">
-                    <!-- Contents to be loaded -->
+                        <!-- Contents to be loaded -->
                 </div>
                 <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="placeOrder()">Order</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="placeOrder" class="btn btn-primary" onclick="placeOrder('.details-items .row-items')" value="false"
+                    data-bs-toggle="modal" data-bs-target="#orderModal">Order</button>
                 </div>
             </div>
         </div>
@@ -82,21 +82,26 @@
     <!-- Confirmation Modal -->
     <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="confirmationModalLabel">Remove Item</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Options</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Please select an action.</p>
+                </div>
+                <div class="modal-footer">
+                    <!-- Add button to change quantity -->
+                    <button type="button" class="btn btn-warning" id="changeQuantityBtn" data-bs-toggle="modal" data-bs-target="#orderModal">Change Quantity</button>
+                    <!-- Add button to delete item -->
+                    <button type="button" class="btn btn-danger" id="deleteItemBtn">Delete Item</button>
+                    <!-- Add button to close modal -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
-            <div class="modal-body">
-              <p>Are you sure you want to remove this item?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                <button id="confirmationSuccessBtn" type="button" class="btn btn-primary">Yes</button>
-            </div>
-          </div>
         </div>
-      </div>
+    </div>
+
     <!-- Side Navigation -->
     <div class="container-fluid">
         <div class="row">

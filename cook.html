@@ -151,9 +151,9 @@
                             <!-- List -->
                         </div>
                     </div>
-                    <div class="row" style="height: 600px;">
+                    <div class="row" style="height: 350px;">
                         <!-- Order Items -->
-                        <div class="order-items col-10 offset-1 p-3 text-center" id="checklist-items" style="max-height: 450px; height: 450px;">
+                        <div class="order-items col-10 offset-1 p-3 text-center" id="checklist-items" style="max-height: 350px; height: 350px;">
                             <!-- Headers -->
                             <div class="row mb-2">
                                 <div class="col-4 list-item p-0"><b class="h6">Quantity</b></div>
@@ -161,6 +161,12 @@
                                 <div class="col-4 list-item p-0"><b class="h6">Actions</b></div>
                             </div>
                             <!-- Contents -->
+                        </div>
+                        <div class="col-12">
+                            <!-- <button class="btn btn-c btn-outline-success" onclick="submit()"> -->
+                            <button class="btn btn-c btn-outline-success" onclick="">
+                                <img src="images/check.svg" alt="Check" height="100%" width="100%">
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -170,13 +176,18 @@
     </div>
     <!-- Body - END -->
     <!-- Scripts -->
+    <script type="text/javascript">
+        window.onbeforeunload = function() {
+            return "Dude, are you sure you want to leave? Think of the kittens!";
+        }
+    </script>
     <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase-storage.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase-firestore.js"></script>
     <script src="js/firestore.js"></script>
     <script src="js/kitchenpersonnel.js"></script>
     <script src="js/bootstrap.min.js"></script>
-
+    
         <!-- Bootstrap and Firebase Scripts -->
 <script type="module" src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
