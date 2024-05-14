@@ -371,74 +371,79 @@ async function submit() {
     const status = "pending";
     const total = document.getElementById("order-total-list").innerHTML;
     const docId = localStorage.getItem("userDocId");
-
-    try {
-        // Get the highest customer id
-        let customerid = await getHighestCustomerId();
-
-        // Increment highestCustomerId
-        customerid++;
-
-        // Save order details to Firestore
-        const orderData = {
-            customerid,
-            tableid,
-            date,
-            status,
-            total
-        };
-
-        // Add details collection to the order document
-        await orderRef.set(orderData);
-
-        const batch = db.batch();
-        const detailsCollection = orderRef.collection("details");
-        // 
-        const customerId = await orderRef.get();
-        localStorage.setItem("customerId", customerId.data().customerid);
-        const orderNumber = localStorage.getItem("customerId");
-        document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
-        // Add details to batch
-        rows.forEach((row, index) => {
-            const qtyHTML = row.querySelector('.qty').innerHTML;
-            const itemHTML = row.querySelector('.item').innerHTML;
-            const totalHTML = row.querySelector('.total').innerHTML;
-            const detailData = {
-                qty: qtyHTML,
-                dish: itemHTML,
-                total: totalHTML
-            };
-            batch.set(detailsCollection.doc(`${index+1}`), detailData);
-        });
-
-        // Commit batch
-        await batch.commit();
-        // console.log("Order and details saved successfully!");
-        alert("Order and details saved successfully!");
-
-        // Get the document ID of the newly created order
-        const orderId = orderRef.id;
-        localStorage.setItem("orderId", orderId);
-        localStorage.setItem("customerId", customerid);
-        console.log("Document ID of the newly created order:", orderId);
-        console.log("Document ID of the newly created order:", customerid);
-        
-        // Update employee status
-        const docRef = db.collection("employees").doc(docId);
-
+    if(total != 0){
         try {
-            await docRef.update({
-                occupantOrderId: orderId, // Assuming orderId is the value you want to set for occupantOrderId
-                occupied: true
+            // Get the highest customer id
+            let customerid = await getHighestCustomerId();
+    
+            // Increment highestCustomerId
+            customerid++;
+    
+            // Save order details to Firestore
+            const orderData = {
+                customerid,
+                tableid,
+                date,
+                status,
+                total
+            };
+    
+            // Add details collection to the order document
+            await orderRef.set(orderData);
+    
+            const batch = db.batch();
+            const detailsCollection = orderRef.collection("details");
+            // 
+            const customerId = await orderRef.get();
+            localStorage.setItem("customerId", customerId.data().customerid);
+            const orderNumber = localStorage.getItem("customerId");
+            document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
+            // Add details to batch
+            rows.forEach((row, index) => {
+                const qtyHTML = row.querySelector('.qty').innerHTML;
+                const itemHTML = row.querySelector('.item').innerHTML;
+                const totalHTML = row.querySelector('.total').innerHTML;
+                const detailData = {
+                    qty: qtyHTML,
+                    dish: itemHTML,
+                    total: totalHTML
+                };
+                batch.set(detailsCollection.doc(`${index+1}`), detailData);
             });
-            console.log("Fields updated successfully!");
+    
+            // Commit batch
+            await batch.commit();
+            // console.log("Order and details saved successfully!");
+            alert("Order and details saved successfully!");
+    
+            // Get the document ID of the newly created order
+            const orderId = orderRef.id;
+            localStorage.setItem("orderId", orderId);
+            localStorage.setItem("customerId", customerid);
+            console.log("Document ID of the newly created order:", orderId);
+            console.log("Document ID of the newly created order:", customerid);
+            
+            // Update employee status
+            const docRef = db.collection("employees").doc(docId);
+    
+            try {
+                await docRef.update({
+                    occupantOrderId: orderId, // Assuming orderId is the value you want to set for occupantOrderId
+                    occupied: true
+                });
+                console.log("Fields updated successfully!");
+            } catch (error) {
+                console.error("Error updating fields:", error);
+            }
         } catch (error) {
-            console.error("Error updating fields:", error);
+            console.error("Error saving order and details: ", error);
+            alert("Error saving order. Please call on a staff.");
         }
-    } catch (error) {
-        console.error("Error saving order and details: ", error);
-        alert("Error saving order. Please call on a staff.");
+    } else {
+        alert("Please select an item to order.");
+        location.reload();
     }
+    
 }
 
 async function followUpOrder() {
