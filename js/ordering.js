@@ -556,7 +556,34 @@ async function copyRowItems(info, order) {
     document.getElementById(order).textContent = orderTotal;
 
     // Get the place-order div
-    const placeOrderDiv = document.querySelector('.'+info);
+    const placeOrderDiv = document.querySelector('.' + info);
+
+    // Get the docId from local storage
+    const docId = localStorage.getItem('orderId');
+    console.log("Order ID from local storage:", docId);
+
+    // Initialize an empty object to store checklist statuses
+    let checklistData = {};
+
+    // Fetch the checklist once and store the data
+    if (info === 'final-order') {
+        try {
+            const checklistSnapshot = await db.collection("orders")
+                .doc("d716BHinTx1rHwR96KOV")
+                .collection("queue")
+                .doc(docId)
+                .collection("checklist")
+                .get();
+
+            checklistSnapshot.forEach(doc => {
+                const dishName = doc.data().dish.replace(/\s+/g, ''); // Remove spaces from dish name
+                checklistData[dishName] = { status: doc.data().status, docId: doc.id };
+            });
+            console.log("Checklist data fetched:", checklistData);
+        } catch (error) {
+            console.error("Error fetching checklist snapshot:", error);
+        }
+    }
 
     // Loop through each row-item
     rowItems.forEach(rowItem => {
@@ -565,6 +592,90 @@ async function copyRowItems(info, order) {
 
         // Remove the fourth column (actions column) from the copy
         copy.removeChild(copy.lastElementChild);
+
+        // if info = 'final-order', add a script that will get the current status of that dish based on the checklist.
+        if (info === 'final-order') {
+            let dishName = copy.children[1].textContent.trim(); // Assuming the dish name is in the second column
+            dishName = dishName.replace(/\s+/g, ''); // Remove spaces from dish name
+            console.log("Processing dish:", dishName);
+            const dishStatusData = checklistData[dishName];
+
+            if (dishStatusData) {
+                // Create a new status div
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'col-2 list-item p-0 mt-2 status';
+
+                // Create the checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = dishStatusData.status === 'completed';
+
+                // Add event listener to checkbox for status update
+                checkbox.addEventListener('change', async () => {
+                    const isChecked = checkbox.checked;
+                    const newStatus = isChecked ? 'completed' : 'incomplete';
+                    console.log(`Checkbox for ${dishName} changed to: ${isChecked}`);
+
+                    try {
+                        // Update the status of the checklist item
+                        await db.collection("orders")
+                            .doc("d716BHinTx1rHwR96KOV")
+                            .collection("queue")
+                            .doc(docId)
+                            .collection("checklist")
+                            .doc(dishStatusData.docId)
+                            .update({ status: newStatus });
+                        console.log(`Status of ${dishName} updated to ${newStatus}.`);
+
+                        // Fetch the updated checklist statuses for all dishes
+                        const updatedChecklistSnapshot = await db.collection("orders")
+                            .doc("d716BHinTx1rHwR96KOV")
+                            .collection("queue")
+                            .doc(docId)
+                            .collection("checklist")
+                            .get();
+
+                        // Update the checklist data with the new statuses
+                        updatedChecklistSnapshot.forEach(doc => {
+                            const dishName = doc.data().dish.replace(/\s+/g, ''); // Remove spaces from dish name
+                            checklistData[dishName] = { status: doc.data().status, docId: doc.id };
+                        });
+
+                        // Check if all checklist items are checked
+                        const allChecked = Object.values(checklistData).every(item => item.status === 'completed');
+
+                        // Update the status of the parent item based on all checklist items' status
+                        const parentStatus = allChecked ? 'served' : 'pending';
+
+                        // Update UI based on parent status
+                        if (allChecked) {
+                            document.getElementById('final-order-status').textContent = 'served';
+                        } else {
+                            document.getElementById('final-order-status').textContent = 'pending';
+                        }
+
+                        // Update the status of the parent item in the database
+                        await db.collection("orders")
+                            .doc("d716BHinTx1rHwR96KOV")
+                            .collection("queue")
+                            .doc(docId)
+                            .update({ status: parentStatus });
+
+                        console.log(`Parent item status updated to ${parentStatus}.`);
+                    } catch (error) {
+                        console.error(`Error updating status of ${dishName}:`, error);
+                    }
+                });
+
+                // Append the checkbox to the status div
+                statusDiv.appendChild(checkbox);
+
+                // Append the status div to the copy (inside the fourth column)
+                copy.insertBefore(statusDiv, copy.children[3]);
+            } else {
+                console.warn(`No checklist data found for dish: ${dishName}`);
+            }
+        }
 
         // Append the copy to the place-order div
         placeOrderDiv.appendChild(copy);
@@ -709,9 +820,9 @@ async function billOut() {
                 alert("Bill-out notified. Please wait for the waiter.");
 
                 // Clear local storage
-                localStorage.setItem("orderId", "");
-                localStorage.setItem("customerId", "");
-                location.reload();
+                // localStorage.setItem("orderId", "");
+                // localStorage.setItem("customerId", "");
+                // location.reload();
             } else {
                 // If the order status is not "served", alert the user
                 alert("Order was not fully served. Cannot proceed with bill-out.");
