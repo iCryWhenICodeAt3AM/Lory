@@ -397,6 +397,7 @@ async function submit() {
             const customerId = await orderRef.get();
             localStorage.setItem("customerId", customerId.data().customerid);
             const orderNumber = localStorage.getItem("customerId");
+            document.getElementById("final-order-total").innerHTML = customerId.data().total;
             document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
             // Add details to batch
             rows.forEach((row, index) => {
@@ -735,7 +736,7 @@ async function createChecklistIfNotExists(orderId) {
             // Fetch details of the order
             const detailsSnapshot = await orderRef.collection("details").get();
             const checklistDocs = checklistSnapshot.docs;
-            let orderStatus = "pending";
+            let orderStatus = detailsSnapshot.status;
 
             // Update existing items in checklist and cross-check for newly added items in details
             for (const detailDoc of detailsSnapshot.docs) {
