@@ -124,7 +124,6 @@ async function paymentSuccess(docId) {
                 detailsSnapshot.forEach(async (doc) => {
                     await salesCollectionRef.collection("details").doc(doc.id).set(doc.data());
                 });
-
                 // Move "checklist" subcollection
                 const checklistCollectionRef = originalDocRef.collection("checklist");
                 const checklistSnapshot = await checklistCollectionRef.get();
@@ -156,9 +155,6 @@ async function paymentSuccess(docId) {
         console.error("Error updating document:", error);
     }
 }
-
-
-
 
 function paymentButtonUpdate(docId){
     const paymentSuccessBtn = document.getElementById("paymentSuccessBtn");

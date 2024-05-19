@@ -22,9 +22,7 @@ async function populateTable() {
                     const detailData = detailDoc.data();
                     const dish = detailData.dish;
                     const qty = detailData.qty;
-
                     const existingChecklistItem = await checklistSnapshot.docs.find(doc => doc.data().dish === dish);
-
                     if (!existingChecklistItem) {
                         // Add new item to checklist
                         await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(itemDoc.id).collection("checklist").add({
@@ -104,7 +102,6 @@ const generateRow = (tableID, timeString, completed, pending, status, itemID, co
     targetList.innerHTML += row;
 };
 
-// Function to handle getting checklist items
 async function getChecklist(itemId, tableID, rowId){
     const currentRow = document.getElementById(rowId);
     // Update counts in column number 3 and 4 of the current row
