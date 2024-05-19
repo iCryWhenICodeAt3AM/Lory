@@ -722,6 +722,7 @@ async function checkOnload() {
                     customerId = orderSnapshot.data().customerid;
                     localStorage.setItem("customerId", customerId);
                     const orderNumber = localStorage.getItem("customerId");
+                    document.getElementById("final-order-status").innerHTML = orderSnapshot.data().status;
                     document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
                     console.log(finalModalTitle);
                     // Open the final modal
