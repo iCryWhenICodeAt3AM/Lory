@@ -118,16 +118,33 @@ async function paymentSuccess(docId) {
                 const salesCollectionRef = db.collection("sales").doc(docId);
                 await salesCollectionRef.set(originalData);
 
-                // Reference the "details" subcollection directly
+                // Move "details" subcollection
                 const detailsCollectionRef = originalDocRef.collection("details");
                 const detailsSnapshot = await detailsCollectionRef.get();
                 detailsSnapshot.forEach(async (doc) => {
                     await salesCollectionRef.collection("details").doc(doc.id).set(doc.data());
                 });
+                // Move "checklist" subcollection
+                const checklistCollectionRef = originalDocRef.collection("checklist");
+                const checklistSnapshot = await checklistCollectionRef.get();
+                checklistSnapshot.forEach(async (doc) => {
+                    await salesCollectionRef.collection("checklist").doc(doc.id).set(doc.data());
+                });
+
+                // Delete documents in "details" subcollection
+                await Promise.all(detailsSnapshot.docs.map(async (doc) => {
+                    await detailsCollectionRef.doc(doc.id).delete();
+                }));
+
+                // Delete documents in "checklist" subcollection
+                await Promise.all(checklistSnapshot.docs.map(async (doc) => {
+                    await checklistCollectionRef.doc(doc.id).delete();
+                }));
 
                 // Delete the original document
                 await originalDocRef.delete();
-                console.log("Document and its details subcollection removed from original collection.");
+                console.log("Document and its subcollections removed from original collection.");
+                location.reload();
             } else {
                 console.log("Payment failed. Status is not bill-out.");
             }
@@ -138,8 +155,6 @@ async function paymentSuccess(docId) {
         console.error("Error updating document:", error);
     }
 }
-
-
 
 function paymentButtonUpdate(docId){
     const paymentSuccessBtn = document.getElementById("paymentSuccessBtn");
@@ -222,7 +237,7 @@ async function fetchData() {
                     <td>${customerid}</td>
                     <td>${total}</td>
                     <td>${status}</td>
-                    <td><button class="btn btn-sm btn-success list-button" id="${itemDoc.id}" onclick="getDetails('${itemDoc.id}', 'dashboard');${billOutEvent}">Confirm</button></td>
+                    <td><button class="btn btn-sm btn-success list-button" id="${itemDoc.id}" onclick="getDetails('${itemDoc.id}', 'dashboard');${billOutEvent}">View</button></td>
                 </tr>
             `;
         });

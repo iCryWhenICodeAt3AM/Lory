@@ -371,34 +371,125 @@ async function submit() {
     const status = "pending";
     const total = document.getElementById("order-total-list").innerHTML;
     const docId = localStorage.getItem("userDocId");
+    if(total != 0){
+        try {
+            // Get the highest customer id
+            let customerid = await getHighestCustomerId();
+    
+            // Increment highestCustomerId
+            customerid++;
+    
+            // Save order details to Firestore
+            const orderData = {
+                customerid,
+                tableid,
+                date,
+                status,
+                total
+            };
+    
+            // Add details collection to the order document
+            await orderRef.set(orderData);
+    
+            const batch = db.batch();
+            const detailsCollection = orderRef.collection("details");
+            // 
+            const customerId = await orderRef.get();
+            localStorage.setItem("customerId", customerId.data().customerid);
+            const orderNumber = localStorage.getItem("customerId");
+            document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
+            // Add details to batch
+            rows.forEach((row, index) => {
+                const qtyHTML = row.querySelector('.qty').innerHTML;
+                const itemHTML = row.querySelector('.item').innerHTML;
+                const totalHTML = row.querySelector('.total').innerHTML;
+                const detailData = {
+                    qty: qtyHTML,
+                    dish: itemHTML,
+                    total: totalHTML
+                };
+                batch.set(detailsCollection.doc(`${index+1}`), detailData);
+            });
+    
+            // Commit batch
+            await batch.commit();
+            // console.log("Order and details saved successfully!");
+            alert("Order and details saved successfully!");
+    
+            // Get the document ID of the newly created order
+            const orderId = orderRef.id;
+            localStorage.setItem("orderId", orderId);
+            localStorage.setItem("customerId", customerid);
+            console.log("Document ID of the newly created order:", orderId);
+            console.log("Document ID of the newly created order:", customerid);
+            
+            // Update employee status
+            const docRef = db.collection("employees").doc(docId);
+    
+            try {
+                await docRef.update({
+                    occupantOrderId: orderId, // Assuming orderId is the value you want to set for occupantOrderId
+                    occupied: true
+                });
+                console.log("Fields updated successfully!");
+            } catch (error) {
+                console.error("Error updating fields:", error);
+            }
+        } catch (error) {
+            console.error("Error saving order and details: ", error);
+            alert("Error saving order. Please call on a staff.");
+        }
+    } else {
+        alert("Please select an item to order.");
+        location.reload();
+    }
+    
+}
 
+async function followUpOrder() {
     try {
-        // Get the highest customer id
-        let customerid = await getHighestCustomerId();
+        const currentDate = new Date();
+        const total = document.getElementById("order-total-list").innerHTML;
+        const orderId = localStorage.getItem("orderId");
+        const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(orderId);
 
-        // Increment highestCustomerId
-        customerid++;
-
-        // Save order details to Firestore
-        const orderData = {
-            customerid,
-            tableid,
-            date,
-            status,
-            total
+        // Step 1: Update existing fields in the document
+        const updateData = {
+            date: currentDate,
+            total: total,
+            status: "pending"
         };
-
-        // Add details collection to the order document
-        await orderRef.set(orderData);
+        await orderRef.update(updateData);
 
         const batch = db.batch();
         const detailsCollection = orderRef.collection("details");
-        // 
-        const customerId = await orderRef.get();
-        localStorage.setItem("customerId", customerId.data().customerid);
-        const orderNumber = localStorage.getItem("customerId");
-        document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
-        // Add details to batch
+
+        // Step 2: Update existing details documents and remove unmatched documents
+        const existingDocsSnapshot = await detailsCollection.get();
+        existingDocsSnapshot.forEach(existingDoc => {
+            const existingData = existingDoc.data();
+            const existingQty = existingData.qty;
+            const existingTotal = existingData.total;
+
+            let foundMatch = false;
+            const rows = document.querySelectorAll('.order-items .row-items');
+            rows.forEach(row => {
+                const qtyHTML = row.querySelector('.qty').innerHTML;
+                const totalHTML = row.querySelector('.total').innerHTML;
+                if (qtyHTML === existingQty && totalHTML === existingTotal) {
+                    foundMatch = true;
+                    return;
+                }
+            });
+
+            if (!foundMatch) {
+                // Remove unmatched document
+                batch.delete(existingDoc.ref);
+            }
+        });
+
+        // Step 3: Add new items from the current rows
+        const rows = document.querySelectorAll('.order-items .row-items');
         rows.forEach((row, index) => {
             const qtyHTML = row.querySelector('.qty').innerHTML;
             const itemHTML = row.querySelector('.item').innerHTML;
@@ -408,7 +499,7 @@ async function submit() {
                 dish: itemHTML,
                 total: totalHTML
             };
-            batch.set(detailsCollection.doc(`${index+1}`), detailData);
+            batch.set(detailsCollection.doc(`${index+1}`), detailData, { merge: true });
         });
 
         // Commit batch
@@ -496,7 +587,6 @@ async function followUpOrder() {
             };
             batch.set(detailsCollection.doc(`${index+1}`), detailData, { merge: true });
         });
-
         // Step 4: Commit batch
         await batch.commit();
         console.log("Details collection updated successfully");
@@ -584,7 +674,6 @@ async function copyRowItems(info, order) {
             console.error("Error fetching checklist snapshot:", error);
         }
     }
-
     // Loop through each row-item
     rowItems.forEach(rowItem => {
         // Create a copy of the row-item
@@ -676,7 +765,6 @@ async function copyRowItems(info, order) {
                 console.warn(`No checklist data found for dish: ${dishName}`);
             }
         }
-
         // Append the copy to the place-order div
         placeOrderDiv.appendChild(copy);
     });
@@ -778,7 +866,6 @@ async function displayOrderItems(orderRef) {
     });
     document.getElementById('order-total-list').innerHTML = sum;
 }
-
 
 function openFinalModal() {
     // Implement this function to open the final modal
