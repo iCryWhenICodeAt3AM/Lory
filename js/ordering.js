@@ -362,7 +362,7 @@ document.querySelector('#confirmationModal .btn-close').addEventListener('click'
 });
 // Submit to database verification
 async function submit() {
-    const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc();
+    const orderRef = await db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc();
     const details = [];
     const currentDate = new Date();
     const rows = document.querySelectorAll('.order-items .row-items');
@@ -415,7 +415,6 @@ async function submit() {
             await batch.commit();
             // console.log("Order and details saved successfully!");
             alert("Order and details saved successfully!");
-    
             // Get the document ID of the newly created order
             const orderId = orderRef.id;
             localStorage.setItem("orderId", orderId);
@@ -432,6 +431,7 @@ async function submit() {
                     occupied: true
                 });
                 console.log("Fields updated successfully!");
+                await populateOrder();
             } catch (error) {
                 console.error("Error updating fields:", error);
             }
@@ -446,6 +446,7 @@ async function submit() {
     
 }
 
+// Upon follow-up order
 async function followUpOrder() {
     try {
         const currentDate = new Date();
@@ -504,8 +505,16 @@ async function followUpOrder() {
 
         // Step 4: Commit batch
         await batch.commit();
-        console.log("Details collection updated successfully");
 
+        // Step 5: Populate Order
+        await populateOrder();
+
+        // Step 6: Update total order price
+        const orderSnapshot = await orderRef.get();
+        const updatedTotal = orderSnapshot.data().total;
+        document.getElementById('final-order-total').textContent = updatedTotal;
+        
+        console.log("Details collection updated successfully");
     } catch (error) {
         console.error("Error updating details collection:", error);
     }
@@ -546,6 +555,18 @@ function removeRowItems(location) {
     });
 }
 
+async function populateOrder(){
+    // Get the docId from local storage
+    const docId = localStorage.getItem('orderId');
+    console.log("Order ID from local storage:", docId);
+
+    // Create or synchronize checklist for the order
+    await createChecklistIfNotExists(docId);
+
+    // Copy row items to the place-order div
+    await copyRowItems('final-order', 'place-order-total');
+}
+
 // Function to copy row items to the place-order div
 async function copyRowItems(info, order) {
     // Remove all existing row-items from the place-order div
@@ -561,19 +582,211 @@ async function copyRowItems(info, order) {
     document.getElementById(order).textContent = orderTotal;
 
     // Get the place-order div
-    const placeOrderDiv = document.querySelector('.'+info);
+    const placeOrderDiv = document.querySelector('.' + info);
+    // Get the docId from local storage
+    const docId = localStorage.getItem('orderId');
+    // Check checklistcollection
+    console.log("Order ID from local storage:", docId);
 
+    // Initialize an empty object to store checklist statuses
+    let checklistData = {};
+
+    // Fetch the checklist once and store the data
+    if (info === 'final-order') {
+        try {
+            const checklistSnapshot = await db.collection("orders")
+                .doc("d716BHinTx1rHwR96KOV")
+                .collection("queue")
+                .doc(docId)
+                .collection("checklist")
+                .get();
+
+            checklistSnapshot.forEach(doc => {
+                const dishName = doc.data().dish.replace(/\s+/g, ''); // Remove spaces from dish name
+                checklistData[dishName] = { status: doc.data().status, docId: doc.id };
+            });
+            console.log("Checklist data fetched:", checklistData);
+        } catch (error) {
+            console.error("Error fetching checklist snapshot:", error);
+        }
+    }
     // Loop through each row-item
-    rowItems.forEach(rowItem => {
+    rowItems.forEach(async rowItem => {
         // Create a copy of the row-item
         const copy = rowItem.cloneNode(true);
 
         // Remove the fourth column (actions column) from the copy
         copy.removeChild(copy.lastElementChild);
 
+        // if info = 'final-order', add a script that will get the current status of that dish based on the checklist.
+        if (info === 'final-order') {
+            let dishName = copy.children[1].textContent.trim(); // Assuming the dish name is in the second column
+            dishName = dishName.replace(/\s+/g, ''); // Remove spaces from dish name
+            console.log("Processing dish:", dishName);
+            const dishStatusData = checklistData[dishName];
+
+            if (dishStatusData) {
+                // Create a new status div
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'col-2 list-item p-0 mt-2 status';
+
+                // Create the checkbox
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = dishStatusData.status === 'completed';
+
+                // Add event listener to checkbox for status update
+                checkbox.addEventListener('change', async () => {
+                    const isChecked = checkbox.checked;
+                    const newStatus = isChecked ? 'completed' : 'incomplete';
+                    console.log(`Checkbox for ${dishName} changed to: ${isChecked}`);
+
+                    try {
+                        // Update the status of the checklist item
+                        await db.collection("orders")
+                            .doc("d716BHinTx1rHwR96KOV")
+                            .collection("queue")
+                            .doc(docId)
+                            .collection("checklist")
+                            .doc(dishStatusData.docId)
+                            .update({ status: newStatus });
+                        console.log(`Status of ${dishName} updated to ${newStatus}.`);
+
+                        // Fetch the updated checklist statuses for all dishes
+                        const updatedChecklistSnapshot = await db.collection("orders")
+                            .doc("d716BHinTx1rHwR96KOV")
+                            .collection("queue")
+                            .doc(docId)
+                            .collection("checklist")
+                            .get();
+
+                        // Update the checklist data with the new statuses
+                        updatedChecklistSnapshot.forEach(doc => {
+                            const dishName = doc.data().dish.replace(/\s+/g, ''); // Remove spaces from dish name
+                            checklistData[dishName] = { status: doc.data().status, docId: doc.id };
+                        });
+
+                        // Check if all checklist items are checked
+                        const allChecked = Object.values(checklistData).every(item => item.status === 'completed');
+
+                        // Update the status of the parent item based on all checklist items' status
+                        const parentStatus = allChecked ? 'served' : 'pending';
+
+                        // Update UI based on parent status
+                        if (allChecked) {
+                            document.getElementById('final-order-status').textContent = 'served';
+                        } else {
+                            document.getElementById('final-order-status').textContent = 'pending';
+                        }
+
+                        // Update the status of the parent item in the database
+                        await db.collection("orders")
+                            .doc("d716BHinTx1rHwR96KOV")
+                            .collection("queue")
+                            .doc(docId)
+                            .update({ status: parentStatus });
+
+                        console.log(`Parent item status updated to ${parentStatus}.`);
+                    } catch (error) {
+                        console.error(`Error updating status of ${dishName}:`, error);
+                    }
+                });
+                // Append the checkbox to the status div
+                statusDiv.appendChild(checkbox);
+
+                // Append the status div to the copy (inside the fourth column)
+                copy.insertBefore(statusDiv, copy.children[3]);
+            } else {
+                console.warn(`No checklist data found for dish: ${dishName}`);
+            }
+        }
         // Append the copy to the place-order div
         placeOrderDiv.appendChild(copy);
     });
+}
+
+async function createChecklistIfNotExists(orderId) {
+    try {
+        const orderRef = db.collection("orders").doc("d716BHinTx1rHwR96KOV").collection("queue").doc(orderId);
+        const checklistSnapshot = await orderRef.collection("checklist").get();
+
+        if (checklistSnapshot.empty) {
+            // Fetch details of the order
+            const detailsSnapshot = await orderRef.collection("details").get();
+
+            // Create checklist items based on order details
+            detailsSnapshot.forEach(async (detailDoc) => {
+                const detailData = detailDoc.data();
+                const dish = detailData.dish;
+                const qty = detailData.qty;
+
+                // Add new item to checklist
+                await orderRef.collection("checklist").add({
+                    qty: qty,
+                    dish: dish,
+                    status: "incomplete"
+                });
+            });
+
+            console.log("Checklist created for order:", orderId);
+        } else {
+            console.log("Checklist already exists for order:", orderId);
+
+            // Fetch details of the order
+            const detailsSnapshot = await orderRef.collection("details").get();
+            const checklistDocs = checklistSnapshot.docs;
+            let orderStatus = "pending";
+
+            // Update existing items in checklist and cross-check for newly added items in details
+            for (const detailDoc of detailsSnapshot.docs) {
+                const detailData = detailDoc.data();
+                const dish = detailData.dish;
+                const qty = detailData.qty;
+
+                // Check if item exists in checklist
+                const existingChecklistItem = checklistDocs.find(doc => doc.data().dish === dish);
+
+                if (!existingChecklistItem) {
+                    // Add new item to checklist
+                    await orderRef.collection("checklist").add({
+                        qty: qty,
+                        dish: dish,
+                        status: "incomplete"
+                    });
+
+                    console.log("New item added to checklist:", dish);
+                } else {
+                    // Update quantity and status if there is a difference
+                    const existingQty = existingChecklistItem.data().qty;
+
+                    if (qty !== existingQty) {
+                        await existingChecklistItem.ref.update({ qty: qty, status: "incomplete" });
+                        console.log(`Quantity updated for ${dish} in checklist.`);
+                        orderStatus = "pending"; // Update order status to pending
+                    }
+                }
+            }
+
+            // Remove duplicate items in details
+            const dishNames = new Set();
+            detailsSnapshot.docs.forEach(doc => {
+                const dish = doc.data().dish;
+                if (dishNames.has(dish)) {
+                    // Remove duplicate dish document
+                    doc.ref.delete();
+                    console.log(`Duplicate dish removed from details: ${dish}`);
+                } else {
+                    dishNames.add(dish);
+                }
+            });
+
+            // Update order status
+            await orderRef.update({ status: orderStatus });
+            console.log("Order status updated to:", orderStatus);
+        }
+    } catch (error) {
+        console.error("Error creating or synchronizing checklist:", error);
+    }
 }
 
 async function checkOnload() {
@@ -616,11 +829,13 @@ async function checkOnload() {
                     customerId = orderSnapshot.data().customerid;
                     localStorage.setItem("customerId", customerId);
                     const orderNumber = localStorage.getItem("customerId");
+                    document.getElementById("final-order-status").innerHTML = orderSnapshot.data().status;
+                    document.getElementById("final-order-total").innerHTML = orderSnapshot.data().total;
                     document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
                     console.log(finalModalTitle);
                     // Open the final modal
                     openFinalModal();
-                    submitButton.setAttribute("onclick", "followUpOrder();copyRowItems('final-order', 'final-order-total')")
+                    submitButton.setAttribute("onclick", "followUpOrder()")
                 } else {
                     console.error("Order document does not exist.");
                 }
@@ -673,12 +888,12 @@ async function displayOrderItems(orderRef) {
 }
 
 
-function openFinalModal() {
+async function openFinalModal() {
     // Implement this function to open the final modal
    // Get a reference to the modal element
     const modal = document.getElementById('finalModal');
 
-    copyRowItems('final-order', 'final-order-total');
+    await populateOrder();
     $('#finalModal').modal('show');
 }
 

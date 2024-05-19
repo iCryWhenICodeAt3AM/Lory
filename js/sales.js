@@ -95,7 +95,7 @@ function appendSale(docId, customerId, tableId, total, date, time){
             <td>${customerId}</td>
             <td>${tableId}</td>
             <td>${total}</td>
-            <td><button class="btn btn-sm btn-success list-button" id="${docId}" onclick="getDetails('${docId}', 'sales')">Confirm</button></td>
+            <td><button class="btn btn-sm btn-success list-button" id="${docId}" onclick="getDetails('${docId}', 'sales')">View</button></td>
         </tr>
     `;
 }

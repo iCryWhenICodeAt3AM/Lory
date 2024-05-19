@@ -13,16 +13,6 @@
   <link rel="stylesheet" href="css/master.css">
 </head>
 <body onload="checkOnload()">
-
-
-
-
-
-
-
-
-
-
   <!-- Top Nav Bar - START -->
     <div class="container-fluid">
         <div class="row">
@@ -244,7 +234,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" id="submitButton" onclick="submit();copyRowItems('final-order', 'final-order-total')" class="btn btn-primary" data-dismiss="modal" data-toggle="modal" data-target="#finalModal" >Place Order</button>
+                        <button type="button" id="submitButton" onclick="submit()" class="btn btn-primary" data-dismiss="modal" data-toggle="modal" data-target="#finalModal" >Place Order</button>
                     </div>
                     </div>
                 </div>
@@ -260,18 +250,25 @@
                       <!-- Show a second modal and hide this one with the button below. -->
                       <!--  -->
                         <!-- Order Items -->
-                        <div class="final-order col-10 offset-2 pe-5 text-center">
+                        <div class="final-order col-10 offset-1 pe-5 text-center">
                             <!-- Headers -->
                             <div class="row mb-2">
-                                <div class="col-3 list-item p-0"><b>Qty</b></div>
+                                <div class="col-2 list-item p-0"><b>Qty</b></div>
                                 <div class="col-6 list-item p-0"><b>Item</b></div>
-                                <div class="col-3 list-item p-0"><b>Total</b></div>
+                                <div class="col-2 list-item p-0"><b>Total</b></div>
+                                <div class="col-2 list-item p-0"><b>Action</b></div>
                             </div>
                             <!-- Contents -->
                         </div>
                         <div class="col-12 pt-3 text-center">
                             <div class="row">
                                 <div class="col-12">
+                                    <h6><b>Order Total</b></h6>
+                                </div>
+                                <div class="col-12">
+                                    <h6 id="final-order-status">pending</h6>
+                                </div>
+                                <div class="col-12 mt-3">
                                     <h6><b>Order Total</b></h6>
                                 </div>
                                 <div class="col-12">
@@ -295,6 +292,7 @@
     <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase-storage.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase-firestore.js"></script>
     <script src="js/firestore.js"></script>
+    
     <script src="js/ordering.js"></script>
     <script src="js/bootstrap.min.js"></script>
 
