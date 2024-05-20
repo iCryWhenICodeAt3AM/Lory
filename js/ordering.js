@@ -800,7 +800,7 @@ async function checkOnload() {
     const docRef = db.collection("employees").doc(docId);
     const docSnapshot  = await docRef.get();
     // onload set the orderId to the current occupant data
-    if (docSnapshot .exists){
+    if (docSnapshot.exists){
         const occupantOrderId = docSnapshot.data().occupantOrderId;
         localStorage.setItem("orderId", occupantOrderId);
         console.log(occupantOrderId);
@@ -826,17 +826,64 @@ async function checkOnload() {
                 
                 if (orderSnapshot.exists) {
                     // Display order details
-                    await displayOrderItems(orderRef); // Implement this function to display order items
-                    customerId = orderSnapshot.data().customerid;
-                    localStorage.setItem("customerId", customerId);
-                    const orderNumber = localStorage.getItem("customerId");
-                    document.getElementById("final-order-status").innerHTML = orderSnapshot.data().status;
-                    document.getElementById("final-order-total").innerHTML = orderSnapshot.data().total;
-                    document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
-                    console.log(finalModalTitle);
-                    // Open the final modal
-                    openFinalModal();
-                    submitButton.setAttribute("onclick", "followUpOrder()")
+                    if(orderSnapshot.data().discount){
+                        // Show the total price and the discounted price in a modal
+                        const originalTotal = orderSnapshot.data().total + orderSnapshot.data().discount;
+                        const discount = orderSnapshot.data().discount;
+                        const discountedTotal = orderSnapshot.data().total;
+                        document.getElementById('total-price').innerHTML = `Original Total<br>${originalTotal.toFixed(2)}`;
+                        document.getElementById('discount').innerHTML = `Discount<br>${discount.toFixed(2)}`;
+                        document.getElementById('discounted-price').innerHTML = `<b>Please Prepare<br><div class="text-success">Php ${parseFloat(discountedTotal).toFixed(2)}</b></div>`;
+                        hideModal();
+                        $('#totalModal').modal('show');
+                        // print the order details
+                        const detailsRef = orderRef.collection("details"); // Reference to the "details" subcollection
+                        const detailsSnapshot = await detailsRef.get(); // Get all documents within the "details" subcollection
+                        let sum = 0;
+                    
+                        detailsSnapshot.forEach((doc) => {
+                            // Access individual document data here using doc.data()
+                            const data = doc.data();
+                            // console.log(data); // Example: Log each document's data
+                            // Extract individual item properties   
+                            const qty = data.qty;
+                            const dish = data.dish;
+                            const total = data.total;
+                            sum += parseInt(total); 
+                            // Generate a unique row id for each item
+                            const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
+                    
+                            // Generate HTML for the current item
+                            const orderHTML = `
+                                <div class="row row-items" id="${rowId}">
+                                    <div class="col-3 list-item p-0 qty border border-top-0 border-bottom-1 border-left-1 border-right-0 p-1 border-dark">${qty}</div>
+                                    <div class="col-6 list-item p-0 item border border-top-0 border-bottom-1 border-left-2 border-right-2 p-1  border-dark">${dish}</div>
+                                    <div class="col-3 list-item p-0 total border border-top-0 border-bottom-1 border-left-0 border-right-1 p-1 border-dark">${total}</div>
+                                </div>
+                            `;
+                    
+                            // Append the generated HTML for the current item to the order items section
+                            document.getElementById('total-order').innerHTML += orderHTML;
+                            
+                        });
+                    
+                        // After user confirms in the modal
+                        document.getElementById('confirm-bill-out').addEventListener('click', async () => {
+                            await updateEmployeeStatusAndNotify();
+                        });
+                    } else{
+                        await displayOrderItems(orderRef); // Implement this function to display order items
+                        customerId = orderSnapshot.data().customerid;
+                        localStorage.setItem("customerId", customerId);
+                        const orderNumber = localStorage.getItem("customerId");
+                        document.getElementById("final-order-status").innerHTML = orderSnapshot.data().status;
+                        document.getElementById("final-order-total").innerHTML = orderSnapshot.data().total;
+                        document.getElementById("finalModalTitle").innerHTML = "ORDER NUMBER: "+orderNumber;
+                        console.log(finalModalTitle);
+                        // Open the final modal
+                        openFinalModal();
+                        submitButton.setAttribute("onclick", "followUpOrder()")
+                    }
                 } else {
                     console.error("Order document does not exist.");
                 }
@@ -915,24 +962,11 @@ async function billOut() {
 
             // Check if the order status is "served"
             if (orderStatus === "served") {
-                // Update the order status to "bill-out"
-                await orderRef.update({ status: "bill-out" });
-
-                // Update employee status and remove occupant details
-                const docId = localStorage.getItem("userDocId");
-                const employeeRef = db.collection("employees").doc(docId);
-                await employeeRef.update({
-                    occupantOrderId: firebase.firestore.FieldValue.delete(),
-                    occupied: firebase.firestore.FieldValue.delete()
-                });
-
-                // Notify the cashier
-                alert("Bill-out notified. Please wait for the waiter.");
-
-                // Clear local storage
-                localStorage.setItem("orderId", "");
-                localStorage.setItem("customerId", "");
-                location.reload();
+                // Check if a discount is available
+                if (!orderData.discount) {
+                    // No discount, proceed with bill-out
+                    await orderRef.update({ status: "bill-out" });
+                }
             } else {
                 // If the order status is not "served", alert the user
                 alert("Order was not fully served. Cannot proceed with bill-out.");
@@ -943,4 +977,21 @@ async function billOut() {
     } catch (error) {
         console.error("Error during bill-out process:", error);
     }
+}
+
+async function updateEmployeeStatusAndNotify() {
+    const docId = localStorage.getItem("userDocId");
+    const employeeRef = db.collection("employees").doc(docId);
+    await employeeRef.update({
+        occupantOrderId: firebase.firestore.FieldValue.delete(),
+        occupied: firebase.firestore.FieldValue.delete()
+    });
+
+    // Notify the cashier
+    alert("Thankyou. Please come again!");
+
+    // Clear local storage
+    localStorage.setItem("orderId", "");
+    localStorage.setItem("customerId", "");
+    location.reload();
 }
