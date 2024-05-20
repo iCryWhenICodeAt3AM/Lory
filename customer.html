@@ -283,7 +283,38 @@
                         <button type="button" class="btn btn-primary" onclick="billOut()">Bill-out</button>                    </div>
                   </div>
                 </div>
-              </div>
+            </div>
+            <!-- Modal for Bill-out and Adding new Order -->
+            <div class="modal fade" id="totalModal" aria-hidden="true" aria-labelledby="totalModalLabel" tabindex="-1">
+                <div class="modal-dialog modal-fullscreen">
+                  <div class="modal-content">
+                    <div class="modal-body totalModal">
+                        <div class="col-4 offset-4 text-center justify-content-center mb-5 border border-2">
+                            <h5 class="modal-title" id="totalModalTitle">Bill</h5>
+                        </div>
+                        <div id="total-content" class="col-6 offset-3 justify-content-center text-center">
+                            <div id="total-order" class="col-12">
+                                <!-- Headers -->
+                                <div class="row">
+                                    <div class="col-3 list-item p-0 border border-2 border-dark"><b>Qty</b></div>
+                                    <div class="col-6 list-item p-0 border border-2 border-dark"><b>Item</b></div>
+                                    <div class="col-3 list-item p-0 border border-2 border-dark"><b>Total</b></div>
+                                </div>
+                                <!-- Contents -->
+                            </div>
+                            <div class="row mt-3">
+                                <div id="total-price" class="col-12"></div>
+                                <div id="discount" class="col-12 mt-3"></div>
+                                <div id="discounted-price" class="col-4 offset-4 border border-2 border-dark mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-primary" id="confirm-bill-out">Ok</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Body - END -->
@@ -301,16 +332,6 @@
             return "Dude, are you sure you want to leave? Think of the kittens!";
         }
     </script>
-
-
-
-
-
-
-
-
-
-
 
 <!-- Bootstrap and Firebase Scripts -->
 <script type="module" src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
